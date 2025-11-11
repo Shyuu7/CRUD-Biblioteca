@@ -6,6 +6,12 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+  actions: read
+
 jobs:
   construir-e-testar:
     runs-on: ubuntu-latest

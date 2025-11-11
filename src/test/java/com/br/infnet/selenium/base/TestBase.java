@@ -16,15 +16,26 @@ public abstract class TestBase {
 
     @BeforeEach
     public void setUp() {
-        WebDriverManager.chromedriver().setup();
         ChromeOptions options = new ChromeOptions();
+        if (System.getProperty("headless", "false").equals("true") ||
+                System.getenv("CI") != null) {
+            options.addArguments("--headless");
+            options.addArguments("--no-sandbox");
+            options.addArguments("--disable-dev-shm-usage");
+            options.addArguments("--disable-gpu");
+            options.addArguments("--window-size=1920,1080");
+            options.addArguments("--disable-extensions");
+            options.addArguments("--disable-web-security");
+            options.addArguments("--allow-running-insecure-content");
+        }
+
         options.addArguments("--disable-web-security");
         options.addArguments("--disable-features=VizDisplayCompositor");
         options.setExperimentalOption("useAutomationExtension", false);
 
+        WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver(options);
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(3));
-        driver.manage().window().maximize();
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
 
         ((JavascriptExecutor) driver).executeScript("window.setTimeout = function(fn, delay) { return window.originalSetTimeout(fn, delay * 2); };");
         driver.get(BASE_URL + "/livros");
