@@ -1,0 +1,55 @@
+name: Testes Selenium
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *'
+jobs:
+  testes-selenium:
+    runs-on: ubuntu-latest
+
+    services:
+      aplicacao:
+        image: openjdk:24-jdk
+        ports:
+          - 7000:7000
+
+    steps:
+      - name: Fazer checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 24
+        uses: actions/setup-java@v4
+        with:
+          java-version: '24'
+          distribution: 'temurin'
+
+      - name: Instalar Chrome
+        uses: browser-actions/setup-chrome@latest
+
+      - name: Cache das dependências Maven
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+
+      - name: Iniciar aplicação
+        run: |
+          mvn exec:java -Dexec.mainClass="com.br.infnet.Main" &
+          sleep 30
+
+      - name: Executar testes Selenium (modo headless)
+        run: mvn test -Dtest="**/*SeleniumTest*" -Dheadless=true
+        env:
+          DISPLAY: :99
+
+      - name: Fazer upload dos resultados dos testes Selenium
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: resultados-selenium
+          path: target/surefire-reports/
