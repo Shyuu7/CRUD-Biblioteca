@@ -72,12 +72,12 @@ mvn test
 
 ### Executar apenas testes unitários
 ```bash
-mvn test -Dtest="!**/*SeleniumTest*"
+mvn test -Dtest="com.br.infnet.service.**.*Test"
 ```
 
 ### Executar testes Selenium
 ```bash
-mvn test -Dtest="**/*SeleniumTest*"
+mvn test -Dtest="com.br.infnet.selenium.**.*Test"
 ```
 
 ### Gerar relatório de cobertura
