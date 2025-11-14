@@ -50,4 +50,30 @@ public class EmprestimoService {
         }
     }
 
+    public void devolverLivro(int id) throws MultaPendenteException {
+        Livro livro = livros.get(id);
+
+        if (livro == null) {
+            throw new NoSuchElementException("Livro não encontrado");
+        }
+
+        if (livro.isDisponivel()) {
+            throw new IllegalStateException("Livro não está emprestado");
+        }
+
+        double multa = calcularMulta(id);
+
+        if (multa > 0) {
+            livro.setMulta(multa);
+            throw new MultaPendenteException("Pendente pagamento de multa no valor de R$ " + String.format("%.2f", multa));
+        }
+
+        livro.setDataEfetivaDevolucao(LocalDate.now());
+        livro.setMulta(0);
+        livro.setDisponivel(true);
+        livro.setPrazoDevolucao(0);
+        livro.setDataEstimadaDevolucao(null);
+        livro.setDataEfetivaDevolucao(null);
+    }
+
 }
