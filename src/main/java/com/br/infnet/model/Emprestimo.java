@@ -4,14 +4,16 @@ import java.time.LocalDate;
 
 public class Emprestimo {
     private final int id;
+    private final int livroId;
     private LocalDate dataEmprestimo;
     private LocalDate dataEstimadaDevolucao;
     private LocalDate dataEfetivaDevolucao;
     private int prazoDevolucao;
     private double multa;
 
-    public Emprestimo (int id, LocalDate dataEmprestimo, LocalDate dataEstimadaDevolucao, int prazoDevolucao, double multa) {
+    public Emprestimo (int id, int livroId, LocalDate dataEmprestimo, LocalDate dataEstimadaDevolucao, int prazoDevolucao, double multa) {
         this.id = id;
+        this.livroId = livroId;
         this.dataEmprestimo = dataEmprestimo;
         this.dataEstimadaDevolucao = dataEstimadaDevolucao;
         this.dataEfetivaDevolucao = null;
@@ -21,6 +23,10 @@ public class Emprestimo {
 
     public int getId() {
         return id;
+    }
+
+    public int getLivroId() {
+        return livroId;
     }
 
     public void setDataEmprestimo(LocalDate dataEmprestimo) {

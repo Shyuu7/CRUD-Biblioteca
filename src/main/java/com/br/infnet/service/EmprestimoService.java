@@ -4,6 +4,7 @@ import com.br.infnet.model.Emprestimo;
 import com.br.infnet.model.Livro;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -31,8 +32,8 @@ public class EmprestimoService {
             throw new IllegalStateException("Livro já está emprestado");
         }
 
-        Emprestimo emprestimo = new Emprestimo(proximoId++, LocalDate.now(),
-                LocalDate.now().plusDays(prazoDevolucao), prazoDevolucao, 0);
+        Emprestimo emprestimo = new Emprestimo(proximoId++, id,
+                LocalDate.now(), LocalDate.now().plusDays(prazoDevolucao), prazoDevolucao, 0);
         emprestimos.put(emprestimo.getId(), emprestimo);
 
         livro.setDataEmprestimo(LocalDate.now());
@@ -99,6 +100,16 @@ public class EmprestimoService {
             return 0;
         }
         return diasDecorridos - 10;
+    }
+
+    public ArrayList<Emprestimo> listarEmprestimos() {
+        ArrayList<Emprestimo> emprestimosAtivos = new ArrayList<>();
+        for (Emprestimo emprestimo : emprestimos.values()) {
+            if (emprestimo.getDataEfetivaDevolucao() == null) {
+                emprestimosAtivos.add(emprestimo);
+            }
+        }
+        return emprestimosAtivos;
     }
 
 }
