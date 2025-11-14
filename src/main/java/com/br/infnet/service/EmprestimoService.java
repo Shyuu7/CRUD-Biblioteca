@@ -76,4 +76,29 @@ public class EmprestimoService {
         livro.setDataEfetivaDevolucao(null);
     }
 
+    public double calcularMulta(int livroId) {
+        Livro livro = livros.get(livroId);
+        if (livro == null) {
+            throw new NoSuchElementException("Livro não encontrado");
+        }
+        int diasAtraso = calcularDiasAtraso(livro);
+        return CalculadoraMulta.calcular(diasAtraso);
+    }
+
+    private int calcularDiasAtraso(Livro livro) {
+        LocalDate dataEmprestimo = livro.getDataEmprestimo();
+        LocalDate dataEfetivaDevolucao = livro.getDataEfetivaDevolucao();
+
+        if (dataEfetivaDevolucao == null) {
+            dataEfetivaDevolucao = LocalDate.now();
+        }
+        int diasDecorridos = dataEmprestimo.until(dataEfetivaDevolucao).getDays();
+
+        //Multa só se aplica se passou dos 10 dias gratuitos
+        if (diasDecorridos <= 10) {
+            return 0;
+        }
+        return diasDecorridos - 10;
+    }
+
 }
