@@ -29,13 +29,6 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Cache dos pacotes SonarCloud
-        uses: actions/cache@v3
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
       - name: Cache das dependências Maven
         uses: actions/cache@v3
         with:
@@ -61,15 +54,18 @@ jobs:
 
       - name: Upload dos resultados para GitHub Security
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{github.workspace}}/results.sarif
 
       - name: Gerar relatório de cobertura JaCoCo
         run: mvn clean test jacoco:report -Dtest="com.br.infnet.service.**.*Test"
 
-      - name: Fazer upload dos relatórios de cobertura
-        uses: codecov/codecov-action@v3
+      - name: Salvar relatório de cobertura como artefato
+        uses: actions/upload-artifact@v4
         with:
-          file: target/site/jacoco/jacoco.xml
-          flags: testesunitarios
+          name: relatorio-cobertura-testes-unitarios-jacoco
+          path: |
+            target/site/jacoco/
+            target/site/jacoco/jacoco.xml
+          retention-days: 30
