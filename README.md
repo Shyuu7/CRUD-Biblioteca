@@ -17,6 +17,7 @@ O sistema foi desenvolvido para gerenciar o acervo de uma biblioteca que realiza
 - **Selenium** - Testes automatizados de interface
 - **JaCoCo** - Cobertura de código
 - **SpotBugs & Checkstyle** - Análise estática de código
+- - **GitHub Actions** - CI/CD e automação
 
 ## 📋 Regras de Negócio
 
@@ -36,7 +37,7 @@ O sistema foi desenvolvido para gerenciar o acervo de uma biblioteca que realiza
 ## 🚀 Como Executar
 
 ### Pré-requisitos
-- Java 24 ou superior
+- Java 21 ou superior
 - Maven 3.6+ 
 - Git
 
@@ -137,6 +138,106 @@ O projeto inclui workflows automatizados para:
 - **Cobertura** de testes
 - **Testes E2E** com Selenium
 
+### 🔄 Workflows Automatizados
+
+#### 1. Pipeline CI/CD (`pipeline-cd-ci.yaml`)
+
+**Descrição**: Workflow principal de integração e entrega contínua que executa build e testes unitários.
+
+**Triggers**:
+- Push nas branches `main` e `develop`
+- Pull requests para branch `main`
+- Execução manual via `workflow_dispatch`
+
+**Funcionalidades**:
+- ✅ Checkout do código fonte
+- ☕ Configuração do ambiente Java 21
+- 📦 Cache das dependências Maven
+- 🔨 Build do projeto com Maven
+- 🧪 Execução de testes unitários
+- 📊 Geração de relatórios de testes
+- 📤 Upload dos resultados como artefatos
+
+#### 2. Análise de Qualidade do Código (`qualidade-codigo.yaml`)
+
+**Descrição**: Workflow dedicado à análise estática e qualidade do código com múltiplas ferramentas.
+
+**Triggers**:
+- Push nas branches `main` e `develop`
+- Pull requests para branch `main`
+- Execução manual via `workflow_dispatch`
+
+**Funcionalidades**:
+- 🔍 **Checkstyle**: Verificação de padrões de codificação
+- 🐛 **SpotBugs**: Detecção de bugs potenciais com saída SARIF
+- 🛡️ **GitHub Security**: Upload automático de resultados de segurança
+- 📈 **JaCoCo**: Geração de relatórios de cobertura de código 
+- 📋 Relatórios exportados como artefatos diretamente no GitHub
+- 💾 Cache otimizado para Maven
+
+#### 3. Testes Selenium (`testes-selenium-workflow.yaml`)
+
+**Descrição**: Workflow especializado em testes end-to-end automatizados com Selenium.
+
+**Triggers**:
+- Push na branch `main`
+- Pull requests para branch `main`
+- Execução manual via `workflow_dispatch`
+- **Agendamento**: Segundas-feiras às 6:00 AM (cron: `0 6 * * 1`)
+
+**Funcionalidades**:
+- 🖥️ **Ambiente Virtual**: Configuração do Xvfb para testes headless
+- 🌐 **Chrome Browser**: Instalação e configuração do Chrome estável
+- 🚀 **Aplicação**: Inicialização automática da aplicação em background
+- ⚡ **Health Check**: Verificação da disponibilidade da aplicação
+- 🧪 **Testes E2E**: Execução completa dos testes Selenium
+- 📸 **Screenshots**: Captura automática de evidências em caso de falha, salvas em `target/selenium-screenshots/`
+- 📋 **Relatórios**: Publicação detalhada dos resultados dos testes como artefatos no GitHub
+
+### 🔧 Configurações dos Workflows
+
+**Permissões Configuradas**:
+- `contents: read` - Leitura do código fonte
+- `checks: write` - Escrita de verificações
+- `pull-requests: write` - Comentários em PRs
+- `security-events: write` - Eventos de segurança
+- `actions: read` - Leitura de actions
+
+**Otimizações Implementadas**:
+- 📦 Cache das dependências Maven para builds mais rápidos
+- ⏱️ Timeouts configurados para evitar builds infinitos
+- 🎯 Execução condicional baseada em sucesso/falha
+- 📊 Relatórios sempre gerados, mesmo em caso de falha
+
+### 📈 Monitoramento e Relatórios
+
+**Artefatos Gerados**:
+- Relatórios de testes unitários (JUnit XML)
+- Screenshots dos testes Selenium
+- Relatórios de cobertura JaCoCo
+- Resultados do Checkstyle e SpotBugs
+- Análises de segurança SARIF
+
+**Integração Externa**:
+- **GitHub Security**: Alertas de segurança automatizados
+- **Test Reporter**: Visualização detalhada dos resultados
+
+### 📋 Relatórios e Artefatos
+
+Os workflows geram automaticamente:
+- **Relatórios de Cobertura**: Disponíveis na aba "Actions" → "Análise de Qualidade"
+- **Resultados de Testes**: Visualizáveis diretamente nas execuções dos workflows
+- **Screenshots de Falhas**: Capturados automaticamente nos testes Selenium
+- **Análises de Segurança**: Integradas ao GitHub Security
+
+
+## 📊 Status dos Workflows
+
+[![Pipeline CI/CD](https://github.com/Shyuu7/CRUD-Biblioteca/actions/workflows/pipeline-cd-ci.yaml/badge.svg)](https://github.com/Shyuu7/CRUD-Biblioteca/actions/workflows/pipeline-cd-ci.yaml)
+[![Análise de Qualidade](https://github.com/Shyuu7/CRUD-Biblioteca/actions/workflows/qualidade-codigo.yaml/badge.svg)](https://github.com/Shyuu7/CRUD-Biblioteca/actions/workflows/qualidade-codigo.yaml)
+[![Testes Selenium](https://github.com/Shyuu7/CRUD-Biblioteca/actions/workflows/testes-selenium-workflow.yaml/badge.svg)](https://github.com/Shyuu7/CRUD-Biblioteca/actions/workflows/testes-selenium-workflow.yaml)
+
+
 ## 🎮 Funcionalidades
 
 ### API Endpoints
@@ -161,14 +262,6 @@ O projeto inclui workflows automatizados para:
 - Controle de empréstimos e devoluções
 - Cálculo automático de multas
 
-## 🤝 Contribuição
-
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
 ## 👥 Autores
 
-- **Desenvolvedor Principal** - [Larissa Conti](https://github.com/Shyuu7)
+- **Desenvolvedora Principal** - [Larissa Conti](https://github.com/Shyuu7)
