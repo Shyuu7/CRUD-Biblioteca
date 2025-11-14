@@ -3,18 +3,24 @@ package com.br.infnet.model;
 import java.time.LocalDate;
 
 public class Emprestimo {
+    private final int id;
     private LocalDate dataEmprestimo;
     private LocalDate dataEstimadaDevolucao;
     private LocalDate dataEfetivaDevolucao;
     private int prazoDevolucao;
     private double multa;
 
-    public Emprestimo (LocalDate dataEmprestimo, LocalDate dataEstimadaDevolucao, int prazoDevolucao, double multa) {
+    public Emprestimo (int id, LocalDate dataEmprestimo, LocalDate dataEstimadaDevolucao, int prazoDevolucao, double multa) {
+        this.id = id;
         this.dataEmprestimo = dataEmprestimo;
         this.dataEstimadaDevolucao = dataEstimadaDevolucao;
         this.dataEfetivaDevolucao = null;
         this.prazoDevolucao = prazoDevolucao;
         this.multa = multa;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public void setDataEmprestimo(LocalDate dataEmprestimo) {
