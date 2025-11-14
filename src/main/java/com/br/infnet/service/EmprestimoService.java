@@ -20,10 +20,16 @@ public class EmprestimoService {
         this.proximoId = 1;
     }
 
-    public void emprestarLivro(int id, int prazoDevolucao) {
+    public Livro obterLivroPorId(int livroId) {
+        return livros.get(livroId);
+    }
+
+
+    public void emprestarLivro(int livroId, int prazoDevolucao) {
         validarPrazoEmprestimo(prazoDevolucao);
 
-        Livro livro = livros.get(id);
+        Livro livro = obterLivroPorId(livroId);
+
         if (livro == null) {
             throw new NoSuchElementException("Livro não encontrado");
         }
@@ -32,7 +38,7 @@ public class EmprestimoService {
             throw new IllegalStateException("Livro já está emprestado");
         }
 
-        Emprestimo emprestimo = new Emprestimo(proximoId++, id,
+        Emprestimo emprestimo = new Emprestimo(proximoId++, livroId,
                 LocalDate.now(), LocalDate.now().plusDays(prazoDevolucao), prazoDevolucao, 0);
         emprestimos.put(emprestimo.getId(), emprestimo);
 
@@ -51,8 +57,8 @@ public class EmprestimoService {
         }
     }
 
-    public void devolverLivro(int id) throws MultaPendenteException {
-        Livro livro = livros.get(id);
+    public void devolverLivro(int livroId) throws MultaPendenteException {
+        Livro livro = obterLivroPorId(livroId);
 
         if (livro == null) {
             throw new NoSuchElementException("Livro não encontrado");
@@ -62,7 +68,7 @@ public class EmprestimoService {
             throw new IllegalStateException("Livro não está emprestado");
         }
 
-        double multa = calcularMulta(id);
+        double multa = calcularMulta(livroId);
 
         if (multa > 0) {
             livro.setMulta(multa);
@@ -78,7 +84,7 @@ public class EmprestimoService {
     }
 
     public double calcularMulta(int livroId) {
-        Livro livro = livros.get(livroId);
+        Livro livro = obterLivroPorId(livroId);
         if (livro == null) {
             throw new NoSuchElementException("Livro não encontrado");
         }
