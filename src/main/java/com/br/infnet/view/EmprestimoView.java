@@ -10,7 +10,7 @@ public class EmprestimoView {
 
     public static String renderEmprestimos(List<Emprestimo> emprestimos, EmprestimoService emprestimoService) {
         StringBuilder html = new StringBuilder();
-        html.append(getHeader("Empréstimos Ativos"));
+        html.append(getHeader("Livros Emprestados"));
         html.append("<div class='container'>");
         html.append("<h1>Empréstimos Ativos</h1>");
         html.append("<a href='/livros' class='btn'>Voltar ao Acervo</a>");
@@ -41,6 +41,38 @@ public class EmprestimoView {
             }
             html.append("</table>");
         }
+        html.append("</div>");
+        html.append(getFooter());
+        return html.toString();
+    }
+
+    public static String renderFormEmprestimo(Livro livro) {
+        return renderFormEmprestimo(livro, null);
+    }
+
+    public static String renderFormEmprestimo(Livro livro, String erro) {
+        StringBuilder html = new StringBuilder();
+        html.append(getHeader("Emprestar Livro"));
+        html.append("<div class='container'>");
+        html.append("<h1>Emprestar Livro</h1>");
+        html.append("<p><strong>Título:</strong> ").append(livro.getTitulo()).append("</p>");
+        html.append("<p><strong>Autor:</strong> ").append(livro.getAutor()).append("</p>");
+
+        // Exibir erro se existir
+        if (erro != null && !erro.trim().isEmpty()) {
+            html.append("<div class='error'>").append(erro).append("</div>");
+        }
+
+        html.append("<form method='post' action='/livros/").append(livro.getId()).append("/emprestar'>");
+        html.append("<div class='form-group'>");
+        html.append("<label for='prazo'>Prazo (dias):</label>");
+        html.append("<input type='number' id='prazo' name='prazo' value='7' required>");
+        html.append("</div>");
+        html.append("<div class='form-actions'>");
+        html.append("<button type='submit' class='btn'>Emprestar</button>");
+        html.append("<a href='/livros' class='btn btn-secondary'>Cancelar</a>");
+        html.append("</div>");
+        html.append("</form>");
         html.append("</div>");
         html.append(getFooter());
         return html.toString();
@@ -233,7 +265,7 @@ public class EmprestimoView {
                         </style>
                     </head>
                     <body>
-                """.formatted(title);
+                """.formatted("Empréstimos Ativos");
     }
 
     private static String getFooter() {
