@@ -17,7 +17,7 @@ O sistema foi desenvolvido para gerenciar o acervo de uma biblioteca que realiza
 - **Selenium** - Testes automatizados de interface
 - **JaCoCo** - Cobertura de código
 - **SpotBugs & Checkstyle** - Análise estática de código
-- - **GitHub Actions** - CI/CD e automação
+- **GitHub Actions** - CI/CD e automação
 
 ## 📋 Regras de Negócio
 
