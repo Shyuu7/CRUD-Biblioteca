@@ -4,17 +4,12 @@ import com.br.infnet.model.Emprestimo;
 import com.br.infnet.model.Livro;
 import com.br.infnet.repository.interfaces.iEmprestimoRepository;
 import com.br.infnet.service.EmprestimoService;
-import com.br.infnet.service.LivroService;
-
-import java.time.LocalDate;
 import java.util.*;
 
 public class EmprestimoRepositoryImpl implements iEmprestimoRepository {
-    private final LivroService livroService;
     private final EmprestimoService emprestimoService;
 
-    public EmprestimoRepositoryImpl(LivroService livroService, EmprestimoService emprestimoService) {
-        this.livroService = livroService;
+    public EmprestimoRepositoryImpl(EmprestimoService emprestimoService) {
         this.emprestimoService = emprestimoService;
     }
 
@@ -30,55 +25,13 @@ public class EmprestimoRepositoryImpl implements iEmprestimoRepository {
     }
 
     @Override
-    public void validarPrazoEmprestimo(int prazo) {
-        emprestimoService.
-    }
-
-    @Override
-    public void removerEmprestimo(int id) {
-
-    }
-
-    @Override
-    public void calcularMulta(Emprestimo emprestimo) {
-
-    }
-
-    @Override
-    public void calcularDiasAtraso(Emprestimo emprestimo) {
-
-    }
-
-    @Override
-    public void atualizarDadosAposEmprestimo(Emprestimo emprestimo) {
-
-    }
-
-    @Override
-    public void atualizarDadosAposDevolucao(Emprestimo emprestimo) {
-
+    public void removerEmprestimo(Emprestimo emprestimo) {
+        Livro livro = buscarLivroPorId(emprestimo.getLivroId());
+        emprestimoService.devolverLivro(livro.getId());
     }
 
     @Override
     public List<Emprestimo> listarEmprestimos() {
         return emprestimoService.listarEmprestimos();
-    }
-
-    private void atualizarDadosEmprestimoNoLivro(Emprestimo emprestimo) {
-        Livro livro = livroService.buscarLivroPorIDNoAcervo(emprestimo.getLivroId());
-        livro.setDataEmprestimo(emprestimo.getDataEmprestimo());
-        livro.setPrazoDevolucao(emprestimo.getPrazoDevolucao());
-        livro.setDataEstimadaDevolucao(emprestimo.getDataEstimadaDevolucao());
-        livro.setDisponivel(false);
-    }
-
-    private void limparDadosEmprestimoNoLivro(int livroId) {
-        Livro livro = livroService.buscarLivroPorIDNoAcervo(livroId);
-        livro.setDataEmprestimo(null);
-        livro.setPrazoDevolucao(0);
-        livro.setDataEstimadaDevolucao(null);
-        livro.setDataEfetivaDevolucao(null);
-        livro.setMulta(0);
-        livro.setDisponivel(true);
     }
 }

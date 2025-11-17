@@ -1,12 +1,13 @@
 package com.br.infnet.repository.interfaces;
 
 import com.br.infnet.model.Emprestimo;
+import com.br.infnet.model.Livro;
 
 import java.util.List;
 
 public interface iEmprestimoRepository {
-    void salvarEmprestimo(Emprestimo emprestimo);
-    void removerEmprestimo(int id);
-    List<Emprestimo> listarEmprestimosAtivos();
-    Emprestimo buscarPorLivroId(int livroId);
+    Livro buscarLivroPorId(int livroId);
+    void realizarEmprestimo(Emprestimo emprestimo);
+    List<Emprestimo> listarEmprestimos();
+    void removerEmprestimo(Emprestimo emprestimo);
 }
