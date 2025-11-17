@@ -107,11 +107,11 @@ public class LivroService {
         return acervo.get(id);
     }
 
-    public ArrayList<Livro> buscarLivroPorTituloNoAcervo(String titulo) {
+    public List<Livro> buscarLivroPorTituloNoAcervo(String titulo) {
         validarTermoBusca(titulo, "Título");
 
         String tituloBusca = SecurityConfig.processarEntrada(titulo.trim().toLowerCase());
-        ArrayList<Livro> livrosDeMesmoNome = new ArrayList<>();
+        List<Livro> livrosDeMesmoNome = new ArrayList<>();
 
         for (Livro livro : acervo.values()) {
             if (livro.getTitulo() != null &&
@@ -134,11 +134,11 @@ public class LivroService {
                 .orElse(null);
     }
 
-    public ArrayList<Livro> buscarLivroPorAutorNoAcervo(String autor) {
+    public List<Livro> buscarLivroPorAutorNoAcervo(String autor) {
         validarTermoBusca(autor, "Autor");
 
         String autorBusca = SecurityConfig.processarEntrada(autor.trim().toLowerCase());
-        ArrayList<Livro> livrosDoAutor = new ArrayList<>();
+        List<Livro> livrosDoAutor = new ArrayList<>();
 
         for (Livro livro : acervo.values()) {
             if (livro.getAutor() != null &&
@@ -182,7 +182,7 @@ public class LivroService {
         acervo.remove(id);
     }
 
-    public ArrayList<Livro> listarLivrosDoAcervo() {
+    public List<Livro> listarLivrosDoAcervo() {
         return new ArrayList<>(acervo.values());
     }
 

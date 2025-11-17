@@ -7,7 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -71,7 +71,7 @@ class LivroServiceTest {
         Livro livro2 = new Livro(service.gerarId(), "Java", "AutorB", "2222222222222");
         service.cadastrarLivroNoAcervo(livro1);
         service.cadastrarLivroNoAcervo(livro2);
-        ArrayList<Livro> encontrados = service.buscarLivroPorTituloNoAcervo("Java");
+        List<Livro> encontrados = service.buscarLivroPorTituloNoAcervo("Java");
         assertEquals(2, encontrados.size());
     }
 
@@ -92,7 +92,7 @@ class LivroServiceTest {
         Livro livro2 = new Livro(service.gerarId(), "Livro2", "Juquinha Baiano", "2222222222222");
         service.cadastrarLivroNoAcervo(livro1);
         service.cadastrarLivroNoAcervo(livro2);
-        ArrayList<Livro> encontrados = service.buscarLivroPorAutorNoAcervo("Juquinha Baiano");
+        List<Livro> encontrados = service.buscarLivroPorAutorNoAcervo("Juquinha Baiano");
         assertEquals(2, encontrados.size());
     }
 
@@ -184,7 +184,7 @@ class LivroServiceTest {
         Livro livro2 = new Livro(service.gerarId(), "Livro2", "AutorB", "2222222222222");
         service.cadastrarLivroNoAcervo(livro1);
         service.cadastrarLivroNoAcervo(livro2);
-        ArrayList<Livro> lista = service.listarLivrosDoAcervo();
+        List<Livro> lista = service.listarLivrosDoAcervo();
 
         assertEquals(5, lista.size());
     }

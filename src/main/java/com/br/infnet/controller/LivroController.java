@@ -7,7 +7,6 @@ import com.br.infnet.utils.ErrorHandler;
 import com.br.infnet.service.MultaPendenteException;
 import com.br.infnet.view.LivroView;
 import io.javalin.Javalin;
-
 import java.util.HashMap;
 import java.util.Map;
 

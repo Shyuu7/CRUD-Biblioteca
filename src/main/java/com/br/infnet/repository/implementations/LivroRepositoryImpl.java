@@ -14,18 +14,28 @@ public class LivroRepositoryImpl implements iLivroRepository {
     }
 
     @Override
-    public Livro obterLivroPorId(int id) {
+    public Livro buscarLivroPorId(int id) {
         return livroService.buscarLivroPorIDNoAcervo(id);
     }
 
     @Override
+    public Livro buscarLivroPorISBN(String isbn) {
+        return livroService.buscarLivroPorISBN(isbn);
+    }
+
+    @Override
+    public List<Livro> listarLivros() {
+        return livroService.listarLivrosDoAcervo();
+    }
+
+    @Override
     public List<Livro> listarLivrosPorTitulo(String titulo) {
-        return List.of();
+        return livroService.buscarLivroPorTituloNoAcervo(titulo);
     }
 
     @Override
     public List<Livro> listarLivrosPorAutor(String autor) {
-        return List.of();
+        return livroService.buscarLivroPorAutorNoAcervo(autor);
     }
 
     @Override
@@ -34,17 +44,17 @@ public class LivroRepositoryImpl implements iLivroRepository {
     }
 
     @Override
-    public void salvar(Livro livro) {
+    public void salvarLivro(Livro livro) {
         livroService.cadastrarLivroNoAcervo(livro);
     }
 
     @Override
-    public void atualizar(int id, String titulo, String autor, String isbn) {
+    public void atualizarLivro(int id, String titulo, String autor, String isbn) {
         livroService.atualizarLivroDoAcervo(id, titulo, autor, isbn);
     }
 
     @Override
-    public void remover(int id) {
+    public void removerLivro(int id) {
         livroService.removerLivroDoAcervo(id);
     }
 }

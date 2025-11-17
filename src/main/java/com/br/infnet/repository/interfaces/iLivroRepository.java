@@ -3,12 +3,14 @@ import com.br.infnet.model.Livro;
 import java.util.List;
 
 public interface iLivroRepository {
-    Livro obterLivroPorId(int id);
+    Livro buscarLivroPorId(int id);
+    Livro buscarLivroPorISBN(String isbn);
+    List<Livro> listarLivros();
     List<Livro> listarLivrosPorTitulo(String titulo);
     List<Livro> listarLivrosPorAutor(String autor);
     boolean existeISBN(String isbn);
-    void salvar(Livro livro);
-    void atualizar(int id, String titulo, String autor, String isbn);
-    void remover(int id);
+    void salvarLivro(Livro livro);
+    void atualizarLivro(int id, String titulo, String autor, String isbn);
+    void removerLivro(int id);
  }
 

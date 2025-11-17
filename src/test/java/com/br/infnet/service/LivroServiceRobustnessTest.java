@@ -92,7 +92,7 @@ public class LivroServiceRobustnessTest {
         }
 
         //Remover todos
-        ArrayList<Livro> livros = service.listarLivrosDoAcervo();
+        List<Livro> livros = service.listarLivrosDoAcervo();
         for (Livro livro : livros) {
             if (livro.getId() > 3) {
                 service.removerLivroDoAcervo(livro.getId());
