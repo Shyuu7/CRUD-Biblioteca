@@ -24,7 +24,6 @@ public class EmprestimoService {
         return livros.get(livroId);
     }
 
-
     public void emprestarLivro(int livroId, int prazoDevolucao) {
         validarPrazoEmprestimo(prazoDevolucao);
 
@@ -41,20 +40,26 @@ public class EmprestimoService {
         Emprestimo emprestimo = new Emprestimo(proximoId++, livroId,
                 LocalDate.now(), LocalDate.now().plusDays(prazoDevolucao), prazoDevolucao, 0);
         emprestimos.put(emprestimo.getId(), emprestimo);
+        atualizarDadosAposEmprestimo(emprestimo);
+    }
 
+    public ArrayList<Emprestimo> listarEmprestimos() {
+        ArrayList<Emprestimo> emprestimosAtivos = new ArrayList<>();
+        for (Emprestimo emprestimo : emprestimos.values()) {
+            if (emprestimo.getDataEfetivaDevolucao() == null) {
+                emprestimosAtivos.add(emprestimo);
+            }
+        }
+        return emprestimosAtivos;
+    }
+
+    private void atualizarDadosAposEmprestimo(Emprestimo emprestimo) {
+        Livro livro = obterLivroPorId(emprestimo.getLivroId());
+        int prazoDevolucao = emprestimo.getPrazoDevolucao();
         livro.setDataEmprestimo(LocalDate.now());
         livro.setPrazoDevolucao(prazoDevolucao);
         livro.setDataEstimadaDevolucao(livro.getDataEmprestimo().plusDays(prazoDevolucao));
         livro.setDisponivel(false);
-    }
-
-    private void validarPrazoEmprestimo(int prazo) {
-        if (prazo <= 0) {
-            throw new IllegalArgumentException("Prazo de devolução deve ser positivo");
-        }
-        if (prazo > 365) {
-            throw new IllegalArgumentException("Prazo de devolução não pode exceder 365 dias");
-        }
     }
 
     public void devolverLivro(int livroId) throws MultaPendenteException {
@@ -74,7 +79,20 @@ public class EmprestimoService {
             livro.setMulta(multa);
             throw new MultaPendenteException("Pendente pagamento de multa no valor de R$ " + String.format("%.2f", multa));
         }
+        atualizarDadosAposDevolucao(emprestimos.get(livroId));
+    }
 
+    private void validarPrazoEmprestimo(int prazo) {
+        if (prazo <= 0) {
+            throw new IllegalArgumentException("Prazo de devolução deve ser positivo");
+        }
+        if (prazo > 365) {
+            throw new IllegalArgumentException("Prazo de devolução não pode exceder 365 dias");
+        }
+    }
+
+    public void atualizarDadosAposDevolucao(Emprestimo emprestimo) {
+        Livro livro = obterLivroPorId(emprestimo.getLivroId());
         livro.setDataEfetivaDevolucao(LocalDate.now());
         livro.setMulta(0);
         livro.setDisponivel(true);
@@ -107,15 +125,4 @@ public class EmprestimoService {
         }
         return diasDecorridos - 10;
     }
-
-    public ArrayList<Emprestimo> listarEmprestimos() {
-        ArrayList<Emprestimo> emprestimosAtivos = new ArrayList<>();
-        for (Emprestimo emprestimo : emprestimos.values()) {
-            if (emprestimo.getDataEfetivaDevolucao() == null) {
-                emprestimosAtivos.add(emprestimo);
-            }
-        }
-        return emprestimosAtivos;
-    }
-
 }
