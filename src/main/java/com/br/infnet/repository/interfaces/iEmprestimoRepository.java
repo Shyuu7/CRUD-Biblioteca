@@ -1,4 +1,4 @@
-package com.br.infnet.repository;
+package com.br.infnet.repository.interfaces;
 
 import com.br.infnet.model.Emprestimo;
 
