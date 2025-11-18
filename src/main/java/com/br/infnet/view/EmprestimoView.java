@@ -78,6 +78,31 @@ public class EmprestimoView {
         return html.toString();
     }
 
+    public static String renderMultaPendente(String mensagemMulta) {
+
+        return getHeader("Multa Pendente") +
+                "<div class='container'>" +
+                "<h1>Multa Pendente</h1>" +
+                "<div class='error'>" +
+                "<h3>⚠️ Não é possível devolver o livro</h3>" +
+                "<p>" + mensagemMulta + "</p>" +
+                "</div>" +
+                "<div class='multa-info'>" +
+                "<h3>Informações sobre Multas:</h3>" +
+                "<ul>" +
+                "<li>Multas devem ser pagas antes da devolução</li>" +
+                "<li>Procure a biblioteca para regularizar sua situação</li>" +
+                "<li>Após o pagamento, você poderá devolver o livro</li>" +
+                "</ul>" +
+                "</div>" +
+                "<div class='actions'>" +
+                "<a href='/emprestimos' class='btn btn-secondary'>Voltar aos Empréstimos</a>" +
+                "<a href='/livros' class='btn'>Ir para Acervo</a>" +
+                "</div>" +
+                "</div>" +
+                getFooter();
+    }
+
     private static String getHeader(String title) {
         return """
                     <!DOCTYPE html>
