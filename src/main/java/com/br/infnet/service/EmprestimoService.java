@@ -2,33 +2,31 @@ package com.br.infnet.service;
 
 import com.br.infnet.model.Emprestimo;
 import com.br.infnet.model.Livro;
+import com.br.infnet.repository.interfaces.iEmprestimoRepository;
+import com.br.infnet.repository.interfaces.iLivroRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 public class EmprestimoService {
-    private final Map<Integer, Emprestimo> emprestimos;
-    private final Map<Integer, Livro> livros;
-    private int proximoId;
+    private final iEmprestimoRepository emprestimoRepository;
+    private final iLivroRepository livroRepository;
 
-    public EmprestimoService(Map<Integer, Livro> livros) {
-        this.emprestimos = new HashMap<>();
-        this.livros = livros;
-        this.proximoId = 1;
+    public EmprestimoService(iEmprestimoRepository emprestimoRepository, iLivroRepository livroRepository) {
+        this.emprestimoRepository = emprestimoRepository;
+        this.livroRepository = livroRepository;
     }
 
     public Livro obterLivroPorId(int livroId) {
-        return livros.get(livroId);
+        return livroRepository.buscarLivroPorId(livroId);
     }
 
     public void emprestarLivro(int livroId, int prazoDevolucao) {
         validarPrazoEmprestimo(prazoDevolucao);
 
-        Livro livro = obterLivroPorId(livroId);
-
+        Livro livro = livroRepository.buscarLivroPorId(livroId);
         if (livro == null) {
             throw new NoSuchElementException("Livro não encontrado");
         }
@@ -37,68 +35,34 @@ public class EmprestimoService {
             throw new IllegalStateException("Livro já está emprestado");
         }
 
-        Emprestimo emprestimo = new Emprestimo(proximoId++, livroId,
-                LocalDate.now(), LocalDate.now().plusDays(prazoDevolucao), prazoDevolucao, 0);
-        emprestimos.put(emprestimo.getId(), emprestimo);
-        atualizarDadosAposEmprestimo(emprestimo);
+        LocalDate dataEmprestimo = LocalDate.now();
+        LocalDate dataEstimadaDevolucao = dataEmprestimo.plusDays(prazoDevolucao);
+
+        Emprestimo emprestimo = new Emprestimo(0, livroId,dataEmprestimo, dataEstimadaDevolucao, prazoDevolucao, 0);
+        emprestimoRepository.realizarEmprestimo(emprestimo);
     }
 
-    public ArrayList<Emprestimo> listarEmprestimos() {
-        ArrayList<Emprestimo> emprestimosAtivos = new ArrayList<>();
-        for (Emprestimo emprestimo : emprestimos.values()) {
-            if (emprestimo.getDataEfetivaDevolucao() == null) {
-                emprestimosAtivos.add(emprestimo);
-            }
-        }
-        return emprestimosAtivos;
-    }
-
-    private void atualizarDadosAposEmprestimo(Emprestimo emprestimo) {
-        Livro livro = obterLivroPorId(emprestimo.getLivroId());
-        int prazoDevolucao = emprestimo.getPrazoDevolucao();
-        livro.setDataEmprestimo(LocalDate.now());
-        livro.setPrazoDevolucao(prazoDevolucao);
-        livro.setDataEstimadaDevolucao(livro.getDataEmprestimo().plusDays(prazoDevolucao));
-        livro.setDisponivel(false);
+    public List<Emprestimo> listarEmprestimos() {
+        return new ArrayList<>(emprestimoRepository.listarEmprestimos());
     }
 
     public void devolverLivro(int livroId) throws MultaPendenteException {
-        Livro livro = obterLivroPorId(livroId);
-
+        Livro livro = livroRepository.buscarLivroPorId(livroId);
         if (livro == null) {
             throw new NoSuchElementException("Livro não encontrado");
         }
-
         if (livro.isDisponivel()) {
             throw new IllegalStateException("Livro não está emprestado");
         }
-
         double multa = calcularMulta(livroId);
-
         if (multa > 0) {
             livro.setMulta(multa);
             throw new MultaPendenteException("Pendente pagamento de multa no valor de R$ " + String.format("%.2f", multa));
         }
-        atualizarDadosAposDevolucao(emprestimos.get(livroId));
-    }
-
-    private void validarPrazoEmprestimo(int prazo) {
-        if (prazo <= 0) {
-            throw new IllegalArgumentException("Prazo de devolução deve ser positivo");
+        Emprestimo emprestimo = emprestimoRepository.buscarLivroPorId(livroId);
+        if (emprestimo != null) {
+            emprestimoRepository.removerEmprestimo(emprestimo);
         }
-        if (prazo > 365) {
-            throw new IllegalArgumentException("Prazo de devolução não pode exceder 365 dias");
-        }
-    }
-
-    public void atualizarDadosAposDevolucao(Emprestimo emprestimo) {
-        Livro livro = obterLivroPorId(emprestimo.getLivroId());
-        livro.setDataEfetivaDevolucao(LocalDate.now());
-        livro.setMulta(0);
-        livro.setDisponivel(true);
-        livro.setPrazoDevolucao(0);
-        livro.setDataEstimadaDevolucao(null);
-        livro.setDataEfetivaDevolucao(null);
     }
 
     public double calcularMulta(int livroId) {
@@ -108,6 +72,15 @@ public class EmprestimoService {
         }
         int diasAtraso = calcularDiasAtraso(livro);
         return CalculadoraMulta.calcular(diasAtraso);
+    }
+
+    private void validarPrazoEmprestimo(int prazo) {
+        if (prazo <= 0) {
+            throw new IllegalArgumentException("Prazo de devolução deve ser positivo");
+        }
+        if (prazo > 365) {
+            throw new IllegalArgumentException("Prazo de devolução não pode exceder 365 dias");
+        }
     }
 
     private int calcularDiasAtraso(Livro livro) {
