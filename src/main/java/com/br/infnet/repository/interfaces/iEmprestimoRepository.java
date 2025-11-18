@@ -6,7 +6,7 @@ import com.br.infnet.model.Livro;
 import java.util.List;
 
 public interface iEmprestimoRepository {
-    Livro buscarLivroPorId(int livroId);
+    Emprestimo buscarLivroPorId(int livroId);
     void realizarEmprestimo(Emprestimo emprestimo);
     List<Emprestimo> listarEmprestimos();
     void removerEmprestimo(Emprestimo emprestimo);
