@@ -9,10 +9,7 @@ import com.br.infnet.utils.FormValidator;
 import com.br.infnet.utils.ErrorHandler;
 import com.br.infnet.service.MultaPendenteException;
 import com.br.infnet.view.EmprestimoView;
-import com.br.infnet.view.EmprestimoView;
 import io.javalin.Javalin;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class EmprestimoController {
@@ -35,7 +32,7 @@ public class EmprestimoController {
             }
         });
 
-        app.get("/livros/{id}/emprestar", ctx -> {
+        app.get("/emprestimos/livros/{id}/emprestar", ctx -> {
             try {
                 Integer idParam = ctx.pathParamAsClass("id", Integer.class).getOrDefault(null);
                 if (idParam == null) {
@@ -61,34 +58,32 @@ public class EmprestimoController {
             }
         });
 
-        app.post("/livros/{id}/emprestar", ctx -> {
+        app.post("/emprestimos", ctx -> {
             try {
-                Integer idParam = ctx.pathParamAsClass("id", Integer.class).getOrDefault(null);
-                if (idParam == null) {
-                    ctx.html(ErrorHandler.handleValidationError("ID inválido"));
+                String livroIdStr = ctx.formParam("livroId");
+                String prazoStr = ctx.formParam("prazo");
+
+                if (livroIdStr == null || livroIdStr.trim().isEmpty()) {
+                    ctx.html(ErrorHandler.handleValidationError("ID do livro é obrigatório"));
                     return;
                 }
 
-                String prazoStr = ctx.formParam("prazo");
+                int livroId = Integer.parseInt(livroIdStr);
 
                 // Validar prazo
                 FormValidator.ValidationResult validation = FormValidator.validatePrazo(prazoStr);
                 if (!validation.isValid()) {
-                    Livro livro = emprestimoService.obterLivroPorId(idParam);
+                    Livro livro = emprestimoService.obterLivroPorId(livroId);
                     if (livro == null) {
                         ctx.html(ErrorHandler.handleNotFound("livro"));
                         return;
                     }
-
-                    Map<String, Object> model = new HashMap<>();
-                    model.put("livro", livro);
-                    model.put("erro", validation.getErrorMessage());
                     ctx.html(EmprestimoView.renderFormEmprestimo(livro, validation.getErrorMessage()));
                     return;
                 }
 
                 // Verificar se livro ainda existe e está disponível
-                Livro livro = emprestimoService.obterLivroPorId(idParam);
+                Livro livro = emprestimoService.obterLivroPorId(livroId);
                 if (livro == null) {
                     ctx.html(ErrorHandler.handleNotFound("livro"));
                     return;
@@ -101,7 +96,7 @@ public class EmprestimoController {
 
                 assert prazoStr != null;
                 int prazo = Integer.parseInt(prazoStr.trim());
-                emprestimoService.emprestarLivro(idParam, prazo);
+                emprestimoService.emprestarLivro(livroId, prazo);
                 ctx.redirect("/emprestimos");
 
             } catch (Exception e) {
@@ -109,7 +104,7 @@ public class EmprestimoController {
             }
         });
 
-        app.post("/livros/{id}/devolver", ctx -> {
+        app.post("/emprestimos/livros/{id}/devolver", ctx -> {
             try {
                 Integer idParam = ctx.pathParamAsClass("id", Integer.class).getOrDefault(null);
                 if (idParam == null) {
