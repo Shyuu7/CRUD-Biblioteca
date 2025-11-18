@@ -21,9 +21,6 @@ public class EmprestimoController {
         EmprestimoRepositoryImpl emprestimoRepository = new EmprestimoRepositoryImpl(livroService);
         this.emprestimoService = new EmprestimoService(emprestimoRepository, livroRepository);
 
-        app.get("/", ctx -> ctx.redirect("/emprestimos"));
-
-        //********************Rotas para empréstimos**************************
         app.get("/emprestimos", ctx -> {
             try {
                 ctx.html(EmprestimoView.renderEmprestimos(emprestimoService.listarEmprestimos(), emprestimoService));
