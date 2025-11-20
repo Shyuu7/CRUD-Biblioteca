@@ -1,6 +1,8 @@
 package com.br.infnet.controller;
 
 import com.br.infnet.model.Livro;
+import com.br.infnet.repository.implementations.LivroRepositoryImpl;
+import com.br.infnet.repository.interfaces.iLivroRepository;
 import com.br.infnet.service.LivroService;
 import com.br.infnet.utils.FormValidator;
 import com.br.infnet.utils.ErrorHandler;
@@ -10,7 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LivroController {
-    private final LivroService service = new LivroService();
+    private final iLivroRepository livroRepository = new LivroRepositoryImpl();
+    private final LivroService service = new LivroService(livroRepository);
 
     public LivroController(Javalin app) {
         app.get("/", ctx -> ctx.redirect("/livros"));
@@ -52,17 +55,8 @@ public class LivroController {
                 String autor = params.get("autor").trim();
                 String isbn = params.get("isbn").replaceAll("[^0-9]", "");
 
-                // Verificar se ISBN já existe
-                if (service.existeISBN(isbn)) {
-                    Map<String, Object> model = new HashMap<>(params);
-                    model.put("erro", "ISBN já cadastrado no sistema");
-                    ctx.html(LivroView.renderForm(model));
-                    return;
-                }
-
-                // Criar livro
-                int id = service.gerarId();
-                Livro livro = new Livro(id, titulo, autor, isbn);
+                // Criar livro (ID será gerado automaticamente pelo repository)
+                Livro livro = new Livro(0, titulo, autor, isbn);
                 service.cadastrarLivroNoAcervo(livro);
                 ctx.redirect("/livros");
 
@@ -124,16 +118,6 @@ public class LivroController {
                 String titulo = params.get("titulo").trim();
                 String autor = params.get("autor").trim();
                 String isbn = params.get("isbn").replaceAll("[^0-9]", "");
-
-                // Verificar se ISBN já existe em outro livro
-                Livro livroComISBN = service.buscarLivroPorISBN(isbn);
-                if (livroComISBN != null && livroComISBN.getId() != idParam) {
-                    Map<String, Object> model = new HashMap<>(params);
-                    model.put("erro", "ISBN já cadastrado em outro livro");
-                    model.put("id", idParam);
-                    ctx.html(LivroView.renderForm(model));
-                    return;
-                }
 
                 service.atualizarLivroDoAcervo(idParam, titulo, autor, isbn);
                 ctx.redirect("/livros");

@@ -3,6 +3,7 @@ package com.br.infnet.controller;
 import com.br.infnet.model.Livro;
 import com.br.infnet.repository.implementations.EmprestimoRepositoryImpl;
 import com.br.infnet.repository.implementations.LivroRepositoryImpl;
+import com.br.infnet.repository.interfaces.iLivroRepository;
 import com.br.infnet.service.EmprestimoService;
 import com.br.infnet.service.LivroService;
 import com.br.infnet.utils.FormValidator;
@@ -16,8 +17,8 @@ public class EmprestimoController {
     private final EmprestimoService emprestimoService;
 
     public EmprestimoController(Javalin app) {
-        LivroService livroService = new LivroService();
-        LivroRepositoryImpl livroRepository = new LivroRepositoryImpl(livroService);
+        iLivroRepository livroRepository = new LivroRepositoryImpl();
+        LivroService livroService = new LivroService(livroRepository);
         EmprestimoRepositoryImpl emprestimoRepository = new EmprestimoRepositoryImpl(livroService);
         this.emprestimoService = new EmprestimoService(emprestimoRepository, livroRepository);
 
