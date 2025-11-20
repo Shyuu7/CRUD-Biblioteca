@@ -2,7 +2,7 @@ package com.br.infnet.service;
 
 import com.br.infnet.model.Livro;
 import com.br.infnet.security.SecurityConfig;
-
+import com.br.infnet.repository.interfaces.iLivroRepository;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class LivroService {
+    private final iLivroRepository livroRepository;
     private final AtomicInteger contadorId = new AtomicInteger(1);
     private final Map<Integer, Livro> acervo = new HashMap<>();
 

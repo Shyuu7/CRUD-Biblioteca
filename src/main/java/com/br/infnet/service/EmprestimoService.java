@@ -6,7 +6,6 @@ import com.br.infnet.repository.interfaces.iEmprestimoRepository;
 import com.br.infnet.repository.interfaces.iLivroRepository;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -43,7 +42,7 @@ public class EmprestimoService {
     }
 
     public List<Emprestimo> listarEmprestimos() {
-        return new ArrayList<>(emprestimoRepository.listarEmprestimos());
+        return emprestimoRepository.listarEmprestimos();
     }
 
     public void devolverLivro(int livroId) throws MultaPendenteException {
@@ -54,15 +53,18 @@ public class EmprestimoService {
         if (livro.isDisponivel()) {
             throw new IllegalStateException("Livro não está emprestado");
         }
+
+        Emprestimo emprestimo = emprestimoRepository.buscarLivroPorId(livroId);
+        if (emprestimo == null) {
+            throw new NoSuchElementException("Empréstimo não encontrado para o livro");
+        }
+
         double multa = calcularMulta(livroId);
         if (multa > 0) {
             livro.setMulta(multa);
             throw new MultaPendenteException("Pendente pagamento de multa no valor de R$ " + String.format("%.2f", multa));
         }
-        Emprestimo emprestimo = emprestimoRepository.buscarLivroPorId(livroId);
-        if (emprestimo != null) {
-            emprestimoRepository.removerEmprestimo(emprestimo);
-        }
+        emprestimoRepository.removerEmprestimo(emprestimo);
     }
 
     public double calcularMulta(int livroId) {
