@@ -1,7 +1,6 @@
 package com.br.infnet.controller;
 
 import com.br.infnet.model.Livro;
-import com.br.infnet.repository.implementations.LivroRepositoryImpl;
 import com.br.infnet.repository.interfaces.iLivroRepository;
 import com.br.infnet.service.LivroService;
 import com.br.infnet.utils.FormValidator;
@@ -12,10 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LivroController {
-    private final iLivroRepository livroRepository = new LivroRepositoryImpl();
-    private final LivroService service = new LivroService(livroRepository);
+    private final LivroService service;
+    public LivroController(Javalin app, iLivroRepository livroRepository) {
+        this.service = new LivroService(livroRepository);
 
-    public LivroController(Javalin app) {
         app.get("/", ctx -> ctx.redirect("/livros"));
 
         app.get("/livros", ctx -> {

@@ -35,12 +35,12 @@ public class LivroService {
         return livroRepository.listarLivrosPorTitulo(titulo);
     }
 
-    public Livro buscarLivroPorISBN(String isbn) {
+    public void buscarLivroPorISBN(String isbn) {
         if (isbn == null || isbn.trim().isEmpty()) {
-            return null;
+            return;
         }
         String isbnBusca = SecurityConfig.processarEntrada(isbn);
-        return livroRepository.buscarLivroPorISBN(isbnBusca);
+        livroRepository.buscarLivroPorISBN(isbnBusca);
     }
 
     public List<Livro> buscarLivroPorAutorNoAcervo(String autor) {
@@ -55,19 +55,24 @@ public class LivroService {
         if (livro == null) {
             throw new NoSuchElementException("Livro não encontrado");
         }
+
+        if(!livro.isDisponivel()) {
+            throw new IllegalStateException("Livro está emprestado e não pode ser atualizado");
+        }
+
         String tituloProcessado = SecurityConfig.processarEntrada(titulo);
         String autorProcessado = SecurityConfig.processarEntrada(autor);
         String isbnProcessado = SecurityConfig.processarEntrada(isbn);
 
         buscarLivroPorISBN(isbnProcessado);
-        if (livroRepository.existeISBN(isbnProcessado)) {
-            throw new IllegalArgumentException("Já existe um livro cadastrado com este ISBN");
+        if (!livro.getIsbn().equals(isbnProcessado)) {
+            Livro novoLivro = livroRepository.buscarLivroPorISBN(isbnProcessado);
+            if (novoLivro != null) {
+                throw new IllegalArgumentException("Já existe um livro cadastrado com este ISBN");
+            }
         }
-
-        livro.setTitulo(tituloProcessado);
-        livro.setAutor(autorProcessado);
-        livro.setIsbn(isbnProcessado);
-        livroRepository.atualizarLivro(livro);
+        Livro livroAtualizado = new Livro(id, tituloProcessado, autorProcessado, isbnProcessado);
+        livroRepository.atualizarLivro(livroAtualizado);
     }
 
     public void removerLivroDoAcervo(int id) {

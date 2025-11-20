@@ -26,7 +26,9 @@ public class LivroRepositoryImpl implements iLivroRepository {
 
     @Override
     public void salvarLivro(Livro livro) {
-        acervo.put(gerarProximoId(), livro);
+        int novoId = gerarProximoId();
+        Livro livroComId = new Livro(novoId, livro.getTitulo(), livro.getAutor(), livro.getIsbn());
+        acervo.put(novoId, livroComId);
     }
 
     @Override

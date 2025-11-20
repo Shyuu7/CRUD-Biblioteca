@@ -33,9 +33,9 @@ public class LivroView {
                 html.append("<td>").append(livro.isDisponivel() ? "Disponível" : "Emprestado").append("</td>");
                 html.append("<td>");
                 html.append("<div class='button-group'>");
-                html.append("<a href='/livros/").append(livro.getId()).append("/editar' class='btn btn-small btn-secondary'>Editar</a>");
                 if (livro.isDisponivel()) {
-                    html.append("<a href='/livros/").append(livro.getId()).append("/emprestar' class='btn btn-small'>Emprestar</a>");
+                    html.append("<a href='/livros/").append(livro.getId()).append("/editar' class='btn btn-small btn-secondary'>Editar</a>");
+                    html.append("<a href='/emprestimos/livros/").append(livro.getId()).append("/emprestar' class='btn btn-small'>Emprestar</a>");
                 }
                 html.append("<form style='display:inline' method='post' action='/livros/").append(livro.getId()).append("/remover'>");
                 html.append("<button type='submit' class='btn-small btn-danger' onclick='return confirm(\"Confirma exclusão?\")'>Remover</button>");
