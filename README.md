@@ -244,16 +244,18 @@ Os workflows geram automaticamente:
 
 #### Livros
 - `GET /livros` - Listar todos os livros
-- `GET /livros/{id}` - Buscar livro por ID
+- `GET /livros/novo` - Exibir formulário de cadastro
 - `POST /livros` - Cadastrar novo livro
-- `PUT /livros/{id}` - Atualizar livro
-- `DELETE /livros/{id}` - Excluir livro
+- `GET /livros/{id}/editar` - Exibir formulário de edição
+- `POST /livros/{id}/editar` - Atualizar livro
+- `POST /livros/{id}/remover` - Remover livro
+- `GET /buscar` - Buscar livros por título, autor ou ISBN
 
 #### Empréstimos
-- `POST /emprestimos` - Registrar empréstimo
-- `PUT /emprestimos/{id}/devolucao` - Registrar devolução
-- `GET /emprestimos` - Listar empréstimos ativos
-- `GET /emprestimos/{id}/multa` - Calcular multa
+- `GET /emprestimos` - Listar todos os empréstimos
+- `GET /emprestimos/livros/{id}/emprestar` - Exibir formulário de empréstimo
+- `POST /emprestimos/livros/{id}/emprestar` - Registrar empréstimo
+- `POST /emprestimos/livros/{id}/devolver` - Registrar devolução
 
 ### Interface Web
 - Formulários para cadastro e edição de livros
