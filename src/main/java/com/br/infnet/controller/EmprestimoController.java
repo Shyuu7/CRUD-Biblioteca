@@ -16,8 +16,7 @@ import io.javalin.Javalin;
 public class EmprestimoController {
     private final EmprestimoService emprestimoService;
 
-    public EmprestimoController(Javalin app) {
-        iLivroRepository livroRepository = new LivroRepositoryImpl();
+    public EmprestimoController(Javalin app, iLivroRepository livroRepository) {
         LivroService livroService = new LivroService(livroRepository);
         EmprestimoRepositoryImpl emprestimoRepository = new EmprestimoRepositoryImpl(livroService);
         this.emprestimoService = new EmprestimoService(emprestimoRepository, livroRepository);
@@ -56,17 +55,16 @@ public class EmprestimoController {
             }
         });
 
-        app.post("/emprestimos", ctx -> {
+        app.post("/emprestimos/livros/{id}/emprestar", ctx -> {
             try {
-                String livroIdStr = ctx.formParam("livroId");
-                String prazoStr = ctx.formParam("prazo");
+                Integer livroId = ctx.pathParamAsClass("id", Integer.class).getOrDefault(null);
 
-                if (livroIdStr == null || livroIdStr.trim().isEmpty()) {
-                    ctx.html(ErrorHandler.handleValidationError("ID do livro é obrigatório"));
+                if (livroId == null) {
+                    ctx.html(ErrorHandler.handleValidationError("ID do livro é inválido"));
                     return;
                 }
+                String prazoStr = ctx.formParam("prazo");
 
-                int livroId = Integer.parseInt(livroIdStr);
 
                 // Validar prazo
                 FormValidator.ValidationResult validation = FormValidator.validatePrazo(prazoStr);

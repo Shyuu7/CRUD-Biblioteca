@@ -23,6 +23,7 @@ public class EmprestimoView {
 
             for (Emprestimo emprestimo : emprestimos) {
                 Livro livro = emprestimoService.obterLivroPorId(emprestimo.getLivroId());
+                System.out.println("Livro ID " + emprestimo.getLivroId() + " título: " + (livro != null ? livro.getTitulo() : "null"));
                 if (livro != null) {
                     html.append("<tr>");
                     html.append("<td>").append(emprestimo.getId()).append("</td>");
@@ -32,7 +33,7 @@ public class EmprestimoView {
                     html.append("<td>").append(emprestimo.getPrazoDevolucao()).append(" dias</td>");
                     html.append("<td>").append(emprestimo.getDataEstimadaDevolucao()).append("</td>");
                     html.append("<td>");
-                    html.append("<form style='display:inline' method='post' action='/emprestimos/").append(emprestimo.getId()).append("/devolver'>");
+                    html.append("<form style='display:inline' method='post' action='/emprestimos/livros/").append(emprestimo.getLivroId()).append("/devolver'>");
                     html.append("<button type='submit' class='btn-small'>Devolver</button>");
                     html.append("</form>");
                     html.append("</td>");
@@ -62,8 +63,7 @@ public class EmprestimoView {
         if (erro != null && !erro.trim().isEmpty()) {
             html.append("<div class='error'>").append(erro).append("</div>");
         }
-
-        html.append("<form method='post' action='/livros/").append(livro.getId()).append("/emprestar'>");
+        html.append("<form method='post' action='/emprestimos/livros/").append(livro.getId()).append("/emprestar'>");
         html.append("<div class='form-group'>");
         html.append("<label for='prazo'>Prazo (dias):</label>");
         html.append("<input type='number' id='prazo' name='prazo' value='7' required>");
