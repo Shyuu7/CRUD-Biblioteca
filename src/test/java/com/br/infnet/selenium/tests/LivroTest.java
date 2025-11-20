@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+
+import java.util.Objects;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -23,7 +26,7 @@ public class LivroTest extends TestBase {
         formPage.preencherFormulario("Ilíada", "Homero", "9788563560568");
         formPage.clickSubmit();
 
-        assertTrue(driver.getCurrentUrl().contains("/livros"));
+        assertTrue(Objects.requireNonNull(driver.getCurrentUrl()).contains("/livros"));
         assertTrue(listPage.isLivroPresente("Ilíada"));
     }
 
@@ -60,7 +63,7 @@ public class LivroTest extends TestBase {
         formPage.preencherFormulario("Teste", "Autor Teste", "1234567890123");
         formPage.clickCancelar();
 
-        assertTrue(driver.getCurrentUrl().contains("/livros"));
+        assertTrue(Objects.requireNonNull(driver.getCurrentUrl()).contains("/livros"));
         assertEquals(quantidadeInicial, listPage.getQuantidadeLivros());
     }
 
@@ -74,7 +77,7 @@ public class LivroTest extends TestBase {
         formPage.clickSubmit();
 
         //validação feita na própria página html
-        assertTrue(driver.getCurrentUrl().contains("novo"));
+        assertTrue(Objects.requireNonNull(driver.getCurrentUrl()).contains("novo"));
     }
 
     @Test
