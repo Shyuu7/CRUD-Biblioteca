@@ -2,7 +2,6 @@ package com.br.infnet.controller;
 
 import com.br.infnet.model.Livro;
 import com.br.infnet.repository.implementations.EmprestimoRepositoryImpl;
-import com.br.infnet.repository.implementations.LivroRepositoryImpl;
 import com.br.infnet.repository.interfaces.iLivroRepository;
 import com.br.infnet.service.EmprestimoService;
 import com.br.infnet.service.LivroService;
