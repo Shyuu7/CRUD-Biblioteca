@@ -39,7 +39,7 @@ public class EmprestimoTest extends TestBase {
         emprestimoPage.definirPrazo(7);
         emprestimoPage.clickEmprestar();
 
-        listPage = new LivroListPage(driver);
+        driver.get(BASE_URL + "/livros");
 
         //não dá para clicar no botão pois ele some após o empréstimo
         //tentativa de burlar a UI

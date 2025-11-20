@@ -6,6 +6,7 @@ import com.br.infnet.repository.interfaces.iEmprestimoRepository;
 import com.br.infnet.repository.interfaces.iLivroRepository;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -92,12 +93,12 @@ public class EmprestimoService {
         if (dataEfetivaDevolucao == null) {
             dataEfetivaDevolucao = LocalDate.now();
         }
-        int diasDecorridos = dataEmprestimo.until(dataEfetivaDevolucao).getDays();
+        long diasDecorridos = ChronoUnit.DAYS.between(dataEmprestimo, dataEfetivaDevolucao);
 
         //Multa só se aplica se passou dos 10 dias gratuitos
         if (diasDecorridos <= 10) {
             return 0;
         }
-        return diasDecorridos - 10;
+        return Math.toIntExact(diasDecorridos - 10);
     }
 }

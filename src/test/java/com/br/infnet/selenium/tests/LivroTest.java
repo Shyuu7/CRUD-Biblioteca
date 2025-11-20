@@ -105,9 +105,8 @@ public class LivroTest extends TestBase {
 
         listPage.clickRemoverLivro(1);
         listPage.cancelarRemocao();
-
-        // Verificar que o livro ainda está presente
         assertEquals(quantidadeInicial, listPage.getQuantidadeLivros());
+        assertTrue(Objects.requireNonNull(driver.getCurrentUrl()).contains("/livros"));
     }
 
     @Test
@@ -118,8 +117,6 @@ public class LivroTest extends TestBase {
 
         listPage.clickRemoverLivro(2);
         listPage.confirmarRemocao();
-
-        // Verificar que o livro foi removido
         assertEquals(quantidadeInicial - 1, listPage.getQuantidadeLivros());
     }
 }
