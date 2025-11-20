@@ -45,8 +45,7 @@ public class LivroService {
 
     public List<Livro> buscarLivroPorAutorNoAcervo(String autor) {
         validarTermoBusca(autor, "Autor");
-        String autorBusca = SecurityConfig.processarEntrada(autor.trim().toLowerCase());
-        return livroRepository.listarLivrosPorAutor(autorBusca);
+        return livroRepository.listarLivrosPorAutor(autor);
     }
 
     public void atualizarLivroDoAcervo(int id, String titulo, String autor, String isbn) {
