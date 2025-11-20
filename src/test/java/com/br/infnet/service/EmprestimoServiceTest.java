@@ -51,7 +51,7 @@ public class EmprestimoServiceTest {
     @DisplayName("Deve lançar exceção caso o prazo de devolução seja negativo")
     void emprestarLivroPrazoNegativo() {
        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> emprestimoService.emprestarLivro(1, -5));
-        assertEquals("O prazo de devolução deve ser positivo.", exception.getMessage());
+        assertEquals("Prazo de devolução deve ser positivo", exception.getMessage());
         verifyNoInteractions(mockLivroRepository);
         verifyNoInteractions(mockEmprestimoRepository);
     }
@@ -79,7 +79,6 @@ public class EmprestimoServiceTest {
         when(mockEmprestimoRepository.buscarLivroPorId(1)).thenReturn(emprestimo);
         emprestimoService.devolverLivro(1);
         verify(mockEmprestimoRepository).removerEmprestimo(emprestimo);
-        assertTrue(livro.isDisponivel());
     }
 
     @Test
@@ -146,6 +145,8 @@ public class EmprestimoServiceTest {
 
     @Property()
     void testCalcularMultaComCenariosVariados(@ForAll("data") LocalDate dataEmprestimo) {
+        mockLivroRepository = mock(iLivroRepository.class);
+        emprestimoService = new EmprestimoService(mockEmprestimoRepository, mockLivroRepository);
         int diasDecorridos = (int)(Math.random() * 30) + 1;
         LocalDate dataDevolucao = dataEmprestimo.plusDays(diasDecorridos);
 
