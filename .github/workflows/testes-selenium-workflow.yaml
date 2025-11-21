@@ -71,22 +71,21 @@ jobs:
           sleep 45
           curl -f http://localhost:7000/livros || exit 1
 
-      - name: Executar testes Selenium e gerar relatório HTML
+      - name: Executar testes Selenium
         run: |
           mvn test -Dtest="com.br.infnet.selenium.**.*Test" \
             -Dheadless=true \
             -Dsurefire.failIfNoSpecifiedTests=false \
             -Dmaven.test.failure.ignore=true
-          mvn surefire-report:report site:site -DgenerateReports=false
         env:
           CI: true
           DISPLAY: :99
 
-      - name: Verificar resultados dos testes
+      - name: Gerar relatório HTML dos testes
+        if: always()
         run: |
-          echo "Verificando arquivos HTML gerados:"
-          find target/site -name "*.html" | head -10
-          ls -la target/site/ || echo "Pasta site não encontrada"
+          mvn surefire-report:report
+          mvn site -DgenerateReports=false
 
       - name: Upload dos relatórios HTML
         uses: actions/upload-artifact@v4
@@ -94,10 +93,7 @@ jobs:
         with:
           name: relatorio-selenium-html-${{ github.sha }}
           path: |
-            target/site/surefire-report.html
-            target/site/css/
-            target/site/images/
-            target/selenium-screenshots/
+            target/site/**
           if-no-files-found: warn
 
       - name: Parar container

@@ -65,7 +65,8 @@ jobs:
       - name: Gerar relatório de cobertura JaCoCo e Surefire HTML
         run: |
           mvn clean test jacoco:report -Dtest="com.br.infnet.service.**.*Test"
-          mvn surefire-report:report site:site -DgenerateReports=false
+          mvn surefire-report:report
+          mvn site -DgenerateReports=false
 
       - name: Salvar relatórios HTML como artefatos
         uses: actions/upload-artifact@v4
@@ -76,7 +77,5 @@ jobs:
             target/site/jacoco/**/*.html
             target/site/jacoco/**/*.css
             target/site/jacoco/**/*.js
-            target/site/surefire-report.html
-            target/site/css/
-            target/site/images/
+            target/site/**
           retention-days: 30

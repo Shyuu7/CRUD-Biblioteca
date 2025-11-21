@@ -44,14 +44,8 @@ jobs:
       - name: Executar testes unitários e gerar relatório HTML
         run: |
           mvn clean test -Dtest="com.br.infnet.service.**.*Test"
-          mvn surefire-report:report site:site -DgenerateReports=false
-
-      - name: Verificar arquivos gerados
-        run: |
-          echo "=== Arquivos no target/site ==="
-          ls -la target/site/ || echo "Diretório site não existe"
-          echo "=== Arquivos surefire-reports ==="
-          ls -la target/surefire-reports/ || echo "Diretório surefire-reports não existe"
+          mvn surefire-report:report
+          mvn site -DgenerateReports=false
 
       - name: Construir JAR
         run: mvn package -DskipTests
@@ -94,7 +88,5 @@ jobs:
         with:
           name: relatorio-testes-html-${{ github.sha }}
           path: |
-            target/site/surefire-report.html
-            target/site/css/
-            target/site/images/
+            target/site/**
           retention-days: 30
