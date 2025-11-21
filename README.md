@@ -81,6 +81,12 @@ mvn test -Dtest="com.br.infnet.service.**.*Test"
 mvn test -Dtest="com.br.infnet.selenium.**.*Test"
 ```
 
+### Gerar relatório HTML dos testes
+```bash
+mvn surefire-report:report
+mvn site -DgenerateReports=false
+```
+
 ### Gerar relatório de cobertura
 ```bash
 mvn test jacoco:report
@@ -88,11 +94,34 @@ mvn test jacoco:report
 
 ### Análise estática de código
 ```bash
-# SpotBugs
 mvn spotbugs:check
 
-# Checkstyle
 mvn checkstyle:check
+```
+
+## 🐳 Executar com Docker
+
+### Usando imagem do DockerHub
+
+1. **Pull e execute diretamente**
+```bash
+docker run -d -p 7000:7000 --name biblioteca-app shyuu7/crud-biblioteca:latest
+```
+
+2. **Acesse a aplicação**
+```bash
+http://localhost:7000
+```
+
+3. **Verifique os logs**
+```bash
+docker logs -f biblioteca-app
+```
+
+4. **Pare e remova o container**
+```bash
+docker stop biblioteca-app
+docker rm biblioteca-app
 ```
 
 ## 📁 Estrutura do Projeto
@@ -114,10 +143,16 @@ src/
 └── test/
     ├── java/
     │   └── com/br/infnet/
+    |       ├── security/      # Testes de segurança
     │       ├── selenium/      # Testes E2E
     │       └── service/       # Testes unitários
     └── resources/
         └── test-data/         # Dados de teste
+target/
+├── selenium-screenshots/        # Screenshots dos testes Selenium
+└── site/
+    ├── surefire-report.html      # Relatório HTML dos testes
+    └── jacoco/                   # Relatório de cobertura JaCoCo
 ```
 
 ## 🔒 Segurança
@@ -190,9 +225,30 @@ O projeto inclui workflows automatizados para:
 - 🌐 **Chrome Browser**: Instalação e configuração do Chrome estável
 - 🚀 **Aplicação**: Inicialização automática da aplicação em background
 - ⚡ **Health Check**: Verificação da disponibilidade da aplicação
-- 🧪 **Testes E2E**: Execução completa dos testes Selenium
+- 🧪 **Testes E2E**: Execução dos testes Selenium com driver headless
+- 📋 **Relatórios HTML**: Geração automática de relatórios detalhados dos testes
 - 📸 **Screenshots**: Captura automática de evidências em caso de falha, salvas em `target/selenium-screenshots/`
-- 📋 **Relatórios**: Publicação detalhada dos resultados dos testes como artefatos no GitHub
+- 📊 **Artefatos**: Upload de relatórios HTML e evidências como artefatos no GitHub
+- 🔄 **Execução em duas etapas**: Testes executados separadamente da geração de relatórios para melhor controle
+
+#### 4. Pipeline Segurança e Análise (`analise-seguranca.yml`)
+
+**Descrição**: Workflow abrangente de análise de segurança com múltiplas ferramentas SAST e DAST.
+
+**Triggers**:
+- Execução após conclusão do Pipeline CI/CD Principal
+- Publicação de releases
+- Execução manual com opções configuráveis
+
+**Funcionalidades**:
+- 🔒 **SAST com CodeQL**: Análise estática de segurança do código fonte
+- 🔍 **Análise de Dependências**: Scanner Snyk para vulnerabilidades em dependências
+- 🌐 **DAST com OWASP ZAP**: Testes dinâmicos de segurança na aplicação em execução
+- 📊 **Relatórios SARIF**: Upload automático para GitHub Security
+- 🚀 **Deploy Automatizado**: Staging e produção com aprovação manual
+- 📋 **Relatórios HTML**: Geração de relatórios detalhados do Snyk
+- 🐳 **Integração Docker**: Testes em ambiente containerizado
+
 
 ### 🔧 Configurações dos Workflows
 
@@ -212,15 +268,20 @@ O projeto inclui workflows automatizados para:
 ### 📈 Monitoramento e Relatórios
 
 **Artefatos Gerados**:
+- Relatórios HTML de testes (Surefire Report)
 - Relatórios de testes unitários (JUnit XML)
-- Screenshots dos testes Selenium
+- Screenshots dos testes Selenium em `target/selenium-screenshots/`
 - Relatórios de cobertura JaCoCo
 - Resultados do Checkstyle e SpotBugs
-- Análises de segurança SARIF
+- Análises de segurança SARIF (CodeQL e Snyk)
+- Relatórios HTML de vulnerabilidades (Snyk)
+- Resultados de testes DAST (OWASP ZAP)
 
 **Integração Externa**:
 - **GitHub Security**: Alertas de segurança automatizados
-- **Test Reporter**: Visualização detalhada dos resultados
+- **DockerHub**: Deploy de imagens containerizadas
+- **OWASP ZAP**: Análise dinâmica de segurança
+- **Snyk**: Monitoramento contínuo de vulnerabilidades
 
 ### 📋 Relatórios e Artefatos
 
@@ -230,13 +291,12 @@ Os workflows geram automaticamente:
 - **Screenshots de Falhas**: Capturados automaticamente nos testes Selenium
 - **Análises de Segurança**: Integradas ao GitHub Security
 
-
 ## 📊 Status dos Workflows
 
 [![Pipeline CI/CD](https://github.com/Shyuu7/CRUD-Biblioteca/actions/workflows/pipeline-cd-ci.yaml/badge.svg)](https://github.com/Shyuu7/CRUD-Biblioteca/actions/workflows/pipeline-cd-ci.yaml)
 [![Análise de Qualidade](https://github.com/Shyuu7/CRUD-Biblioteca/actions/workflows/qualidade-codigo.yaml/badge.svg)](https://github.com/Shyuu7/CRUD-Biblioteca/actions/workflows/qualidade-codigo.yaml)
 [![Testes Selenium](https://github.com/Shyuu7/CRUD-Biblioteca/actions/workflows/testes-selenium-workflow.yaml/badge.svg)](https://github.com/Shyuu7/CRUD-Biblioteca/actions/workflows/testes-selenium-workflow.yaml)
-
+[![Segurança](https://github.com/Shyuu7/CRUD-Biblioteca/actions/workflows/analise-seguranca.yml/badge.svg)](https://github.com/Shyuu7/CRUD-Biblioteca/actions/workflows/analise-seguranca.yml)
 
 ## 🎮 Funcionalidades
 
