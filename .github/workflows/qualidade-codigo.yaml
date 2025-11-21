@@ -61,19 +61,3 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{github.workspace}}/results.sarif
-
-      - name: Gerar relatório de cobertura JaCoCo
-        run: |
-          mvn clean test jacoco:report -Dtest="com.br.infnet.service.**.*Test"
-
-      - name: Salvar relatórios de cobertura como artefatos
-        uses: actions/upload-artifact@v4
-        with:
-          name: relatorios-qualidade-${{ github.sha }}
-          path: |
-            target/site/jacoco/index.html
-            target/site/jacoco/**/*.html
-            target/site/jacoco/**/*.css
-            target/site/jacoco/**/*.js
-            target/jacoco.exec
-          retention-days: 30
