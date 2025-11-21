@@ -62,20 +62,18 @@ jobs:
         with:
           sarif_file: ${{github.workspace}}/results.sarif
 
-      - name: Gerar relatório de cobertura JaCoCo e Surefire HTML
+      - name: Gerar relatório de cobertura JaCoCo
         run: |
           mvn clean test jacoco:report -Dtest="com.br.infnet.service.**.*Test"
-          mvn surefire-report:report
-          mvn site -DgenerateReports=false
 
-      - name: Salvar relatórios HTML como artefatos
+      - name: Salvar relatórios de cobertura como artefatos
         uses: actions/upload-artifact@v4
         with:
-          name: relatorios-html-qualidade-${{ github.sha }}
+          name: relatorios-qualidade-${{ github.sha }}
           path: |
             target/site/jacoco/index.html
             target/site/jacoco/**/*.html
             target/site/jacoco/**/*.css
             target/site/jacoco/**/*.js
-            target/site/**
+            target/jacoco.exec
           retention-days: 30
