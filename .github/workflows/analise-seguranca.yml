@@ -72,30 +72,34 @@ jobs:
         uses: github/codeql-action/analyze@v4
 
       - name: Análise de dependências com Snyk
-        uses: snyk/actions/maven-3-jdk-21@master
+        run: |
+          if [ -n "${{ secrets.SNYK_TOKEN }}" ]; then
+            echo "Configurando autenticação do Snyk..."
+            npm install -g snyk
+            echo "${{ secrets.SNYK_TOKEN }}" | snyk auth --api-token
+          
+            echo "Executando análise Snyk..."
+            snyk test --maven --sarif-file-output=snyk.sarif --severity-threshold=medium || true
+          else
+            echo "Token Snyk não configurado, pulando análise"
+            echo '{"runs": [{"results": []}]}' > snyk.sarif
+          fi
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --sarif-file-output=snyk.sarif --severity-threshold=medium
-
-      - name: Verificar arquivos gerados pelo Snyk
-        run: |
-          echo "=== Arquivos no diretório atual ==="
-          ls -la
-          echo "=== Procurando arquivos SARIF ==="
-          find . -name "*.sarif" -type f || echo "Nenhum arquivo SARIF encontrado"
 
       - name: Gerar relatório HTML do Snyk (alternativo)
         if: always()
         run: |
-          # Executar Snyk novamente para gerar relatório HTML
           if [ -n "${{ secrets.SNYK_TOKEN }}" ]; then
-            npx snyk test --json > snyk-results.json || true
-            npx snyk-to-html -i snyk-results.json -o snyk-report.html || true
+            echo "Gerando relatório HTML do Snyk..."
+            npm install -g snyk-to-html
+            snyk test --maven --json > snyk-results.json || true
+            snyk-to-html -i snyk-results.json -o snyk-report.html || true
           else
             echo "Token Snyk não configurado, criando relatório mock"
-            echo "<html><body><h1>Relatório Snyk</h1><p>Token não configurado</p></body></html>" > snyk-report.html
+            echo "<html><body><h1>Relatório Snyk</h1><p>Token não configurado para análise de vulnerabilidades</p></body></html>" > snyk-report.html
+            echo '{"vulnerabilities": [], "summary": "Token não configurado"}' > snyk-results.json
           fi
 
       - name: Upload relatório Snyk para GitHub (se SARIF existir)
