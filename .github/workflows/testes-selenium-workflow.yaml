@@ -1,10 +1,9 @@
 name: Testes Selenium
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_run:
+    workflows: ["Pipeline CI/CD Principal"]
+    types: [completed]
   workflow_dispatch:
   schedule:
     - cron: '0 6 * * 1'
@@ -14,9 +13,14 @@ permissions:
   checks: write
   pull-requests: write
 
+env:
+  MAVEN_OPTS: "-Xmx3072m"
+  JAVA_VERSION: '21'
+
 jobs:
   testes-selenium:
     runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name != 'workflow_run'
 
     steps:
       - name: Checkout do código
@@ -49,43 +53,54 @@ jobs:
       - name: Compilar projeto
         run: mvn clean compile test-compile
 
-      - name: Iniciar aplicação em background
+      - name: Login no DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Pull e iniciar aplicação do DockerHub
         run: |
-          mvn exec:java -Dexec.mainClass="com.br.infnet.app.Main" &
+          # Fazer pull da imagem
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/biblioteca-app:${{ github.ref_name }}-${{ github.sha }}
+
+          # Executar aplicação
+          docker run -d -p 7000:7000 \
+            --name biblioteca-app \
+            ${{ secrets.DOCKERHUB_USERNAME }}/biblioteca-app:${{ github.ref_name }}-${{ github.sha }}
+
           sleep 45
           curl -f http://localhost:7000/livros || exit 1
 
-      - name: Executar testes Selenium
+      - name: Executar testes Selenium e gerar relatório HTML
         run: |
           mvn test -Dtest="com.br.infnet.selenium.**.*Test" \
             -Dheadless=true \
             -Dsurefire.failIfNoSpecifiedTests=false \
             -Dmaven.test.failure.ignore=true
+          mvn surefire-report:report site:site -DgenerateReports=false
         env:
           CI: true
           DISPLAY: :99
 
       - name: Verificar resultados dos testes
         run: |
-          echo "Verificando arquivos gerados:"
-          find target -name "*.xml" -o -name "*.txt" | head -10
-          ls -la target/surefire-reports/ || echo "Pasta surefire-reports não encontrada"
+          echo "Verificando arquivos HTML gerados:"
+          find target/site -name "*.html" | head -10
+          ls -la target/site/ || echo "Pasta site não encontrada"
 
-      - name: Upload dos resultados
+      - name: Upload dos relatórios HTML
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: relatorio-testes-selenium
+          name: relatorio-selenium-html-${{ github.sha }}
           path: |
-            target/surefire-reports/
+            target/site/surefire-report.html
+            target/site/css/
+            target/site/images/
             target/selenium-screenshots/
           if-no-files-found: warn
 
-      - name: Publicar resultados dos testes
-        uses: dorny/test-reporter@v1
+      - name: Parar container
         if: always()
-        with:
-          name: Resultados Testes Selenium
-          path: target/surefire-reports/*.xml
-          reporter: java-junit
-          fail-on-error: false
+        run: docker stop biblioteca-app && docker rm biblioteca-app

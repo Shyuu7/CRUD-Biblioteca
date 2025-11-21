@@ -1,10 +1,9 @@
 name: Análise de Qualidade do Código
 
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
+  workflow_run:
+    workflows: ["Pipeline CI/CD Principal"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -13,9 +12,14 @@ permissions:
   pull-requests: write
   security-events: write
 
+env:
+  MAVEN_OPTS: "-Xmx3072m"
+  JAVA_VERSION: '21'
+
 jobs:
   analise-codigo:
     runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Fazer checkout do código
@@ -58,14 +62,21 @@ jobs:
         with:
           sarif_file: ${{github.workspace}}/results.sarif
 
-      - name: Gerar relatório de cobertura JaCoCo
-        run: mvn clean test jacoco:report -Dtest="com.br.infnet.service.**.*Test"
+      - name: Gerar relatório de cobertura JaCoCo e Surefire HTML
+        run: |
+          mvn clean test jacoco:report -Dtest="com.br.infnet.service.**.*Test"
+          mvn surefire-report:report site:site -DgenerateReports=false
 
-      - name: Salvar relatório de cobertura como artefato
+      - name: Salvar relatórios HTML como artefatos
         uses: actions/upload-artifact@v4
         with:
-          name: relatorio-cobertura-testes-unitarios-jacoco
+          name: relatorios-html-qualidade-${{ github.sha }}
           path: |
-            target/site/jacoco/
-            target/site/jacoco/jacoco.xml
+            target/site/jacoco/index.html
+            target/site/jacoco/**/*.html
+            target/site/jacoco/**/*.css
+            target/site/jacoco/**/*.js
+            target/site/surefire-report.html
+            target/site/css/
+            target/site/images/
           retention-days: 30
