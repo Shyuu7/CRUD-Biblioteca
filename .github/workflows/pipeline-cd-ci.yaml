@@ -54,7 +54,7 @@ jobs:
           ls -la target/surefire-reports/ || echo "Diretório surefire-reports não existe"
 
       - name: Construir JAR
-        run: mvn clean package -DskipTests
+        run: mvn package -DskipTests
 
       - name: Login no DockerHub
         uses: docker/login-action@v3
