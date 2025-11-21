@@ -1,4 +1,5 @@
-name: Pipeline CI/CD
+name: Pipeline CI/CD Principal
+
 on:
   push:
     branches: [ main, develop ]
@@ -12,9 +13,16 @@ permissions:
   pull-requests: write
   actions: read
 
+env:
+  MAVEN_OPTS: "-Xmx3072m"
+  JAVA_VERSION: '21'
+
 jobs:
   construir-e-testar:
     runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
 
     steps:
       - name: Fazer checkout do código
@@ -33,23 +41,54 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Construir com Maven
-        run: mvn clean compile
+      - name: Executar testes unitários e gerar relatório HTML
+        run: |
+          mvn test -Dtest="com.br.infnet.service.**.*Test"
+          mvn surefire-report:report-only site:site -DgenerateReports=false
 
-      - name: Executar testes unitários
-        run: mvn test -Dtest="com.br.infnet.service.**.*Test"
+      - name: Construir JAR
+        run: mvn clean package -DskipTests
 
-      - name: Gerar relatório de testes
-        uses: dorny/test-reporter@v1
-        if: success() || failure()
+      - name: Login no DockerHub
+        uses: docker/login-action@v3
         with:
-          name: Testes Maven
-          path: target/surefire-reports/*.xml
-          reporter: java-junit
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Fazer upload dos resultados dos testes
+      - name: Extrair metadados Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/biblioteca-app
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build e Push imagem Docker
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: biblioteca-app-jar-${{ github.sha }}
+          path: target/*.jar
+          retention-days: 30
+
+      - name: Fazer upload do relatório HTML dos testes
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: resultados-testes
-          path: target/surefire-reports/
+          name: relatorio-testes-html-${{ github.sha }}
+          path: |
+            target/site/surefire-report.html
+            target/site/css/
+            target/site/images/
+          retention-days: 30
