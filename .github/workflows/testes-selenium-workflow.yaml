@@ -81,20 +81,24 @@ jobs:
           CI: true
           DISPLAY: :99
 
-      - name: Gerar relatório HTML dos testes
-        if: always()
-        run: |
-          mvn surefire-report:report
-          mvn site -DgenerateReports=false
-
-      - name: Upload dos relatórios HTML
+      - name: Upload dos resultados dos testes
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: relatorio-selenium-html-${{ github.sha }}
+          name: relatorio-selenium-${{ github.sha }}
           path: |
-            target/site/**
+            target/surefire-reports/**/*.xml
+            target/surefire-reports/**/*.txt
+            target/selenium-screenshots/**/*.png
           if-no-files-found: warn
+
+      - name: Publicar resultados dos testes
+        uses: mikepenz/action-junit-report@v4
+        if: always()
+        with:
+          report_paths: 'target/surefire-reports/TEST-*.xml'
+          check_name: 'Selenium Test Results'
+          fail_on_failure: false
 
       - name: Parar container
         if: always()
