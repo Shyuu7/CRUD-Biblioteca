@@ -131,15 +131,18 @@ src/
 ├── main/
 │   ├── java/
 │   │   └── com/br/infnet/
-│   │       ├── app/           # Classe principal
-│   │       ├── controller/    # Controladores REST
-│   │       ├── model/         # Modelos de dados
-│   │       ├── service/       # Lógica de negócio
-│   │       ├── security/      # Validação e sanitização
-│   │       ├── utils/         # Utilitários
-│   │       └── view/          # Camada de apresentação
+│   │       ├── app/          # Classe principal
+│   │       ├── controller/   # Controladores REST
+│   │       ├── model/        # Modelos de dados
+|   |       ├── repository/
+|   |           ├── implementations   # Implementações dos repositórios
+|   |           └── interfaces        # Interfaces
+│   │       ├── service/      # Lógica de negócio
+│   │       ├── security/     # Validação e sanitização
+│   │       ├── utils/        # Utilitários
+│   │       └── view/         # Camada de apresentação
 │   └── resources/
-│       └── test-data/         # Dados para testes
+│       └── test-data/        # Dados para testes
 └── test/
     ├── java/
     │   └── com/br/infnet/
@@ -177,10 +180,11 @@ O projeto inclui workflows automatizados para:
 
 #### 1. Pipeline CI/CD (`pipeline-cd-ci.yaml`)
 
-**Descrição**: Workflow principal de integração e entrega contínua que executa build e testes unitários.
+**Descrição**: Workflow principal de integração e entrega contínua que executa build e testes unitários, além da criação
+de uma imagem Docker e seu push para o DockerHub.
 
 **Triggers**:
-- Push nas branches `main` e `develop`
+- Push nas branches `main`, `develop`, `test`, `production`
 - Pull requests para branch `main`
 - Execução manual via `workflow_dispatch`
 
@@ -191,22 +195,21 @@ O projeto inclui workflows automatizados para:
 - 🔨 Build do projeto com Maven
 - 🧪 Execução de testes unitários
 - 📊 Geração de relatórios de testes
-- 📤 Upload dos resultados como artefatos
+- 🐳 Construção da imagem Docker
+- 📤 Push da imagem para o DockerHub
+- 📁 Relatório JaCoCo e arquivo .jar salvos como artefatos diretamente no GitHub
 
 #### 2. Análise de Qualidade do Código (`qualidade-codigo.yaml`)
 
 **Descrição**: Workflow dedicado à análise estática e qualidade do código com múltiplas ferramentas.
 
 **Triggers**:
-- Push nas branches `main` e `develop`
-- Pull requests para branch `main`
-- Execução manual via `workflow_dispatch`
+- Execução completa do workflow `pipeline-cd-ci.yaml`
 
 **Funcionalidades**:
 - 🔍 **Checkstyle**: Verificação de padrões de codificação
 - 🐛 **SpotBugs**: Detecção de bugs potenciais com saída SARIF
 - 🛡️ **GitHub Security**: Upload automático de resultados de segurança
-- 📈 **JaCoCo**: Geração de relatórios de cobertura de código 
 - 📋 Relatórios exportados como artefatos diretamente no GitHub
 - 💾 Cache otimizado para Maven
 
@@ -215,21 +218,16 @@ O projeto inclui workflows automatizados para:
 **Descrição**: Workflow especializado em testes end-to-end automatizados com Selenium.
 
 **Triggers**:
-- Push na branch `main`
-- Pull requests para branch `main`
-- Execução manual via `workflow_dispatch`
+- Execução completa do workflow `pipeline-cd-ci.yaml`
 - **Agendamento**: Segundas-feiras às 6:00 AM (cron: `0 6 * * 1`)
 
 **Funcionalidades**:
 - 🖥️ **Ambiente Virtual**: Configuração do Xvfb para testes headless
 - 🌐 **Chrome Browser**: Instalação e configuração do Chrome estável
-- 🚀 **Aplicação**: Inicialização automática da aplicação em background
-- ⚡ **Health Check**: Verificação da disponibilidade da aplicação
-- 🧪 **Testes E2E**: Execução dos testes Selenium com driver headless
-- 📋 **Relatórios HTML**: Geração automática de relatórios detalhados dos testes
+- 📥 **Docker**: Download e execução da imagem Docker criada no pipeline principal
+- 🧪 **Testes E2E**: Execução dos testes Selenium
 - 📸 **Screenshots**: Captura automática de evidências em caso de falha, salvas em `target/selenium-screenshots/`
-- 📊 **Artefatos**: Upload de relatórios HTML e evidências como artefatos no GitHub
-- 🔄 **Execução em duas etapas**: Testes executados separadamente da geração de relatórios para melhor controle
+- 📊 **Artefatos**: Upload dos resultados e evidências como artefatos no GitHub
 
 #### 4. Pipeline Segurança e Análise (`analise-seguranca.yml`)
 
@@ -252,13 +250,6 @@ O projeto inclui workflows automatizados para:
 
 ### 🔧 Configurações dos Workflows
 
-**Permissões Configuradas**:
-- `contents: read` - Leitura do código fonte
-- `checks: write` - Escrita de verificações
-- `pull-requests: write` - Comentários em PRs
-- `security-events: write` - Eventos de segurança
-- `actions: read` - Leitura de actions
-
 **Otimizações Implementadas**:
 - 📦 Cache das dependências Maven para builds mais rápidos
 - ⏱️ Timeouts configurados para evitar builds infinitos
@@ -268,7 +259,6 @@ O projeto inclui workflows automatizados para:
 ### 📈 Monitoramento e Relatórios
 
 **Artefatos Gerados**:
-- Relatórios HTML de testes (Surefire Report)
 - Relatórios de testes unitários (JUnit XML)
 - Screenshots dos testes Selenium em `target/selenium-screenshots/`
 - Relatórios de cobertura JaCoCo
