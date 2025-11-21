@@ -1,8 +1,21 @@
-FROM eclipse-temurin:21-jdk-alpine
+#Build
+FROM eclipse-temurin:21-jdk-alpine AS build
 
 WORKDIR /app
 
-COPY target/*.jar app.jar
+COPY pom.xml .
+COPY src ./src
+
+RUN apk add --no-cache maven && \
+    mvn clean package -DskipTests
+
+#Runtime
+FROM eclipse-temurin:21-jre-alpine
+
+WORKDIR /app
+
+
+COPY --from=build /app/target/*.jar app.jar
 
 ENV JAVALIN_HOST=0.0.0.0 \
     JAVALIN_PORT=7000
