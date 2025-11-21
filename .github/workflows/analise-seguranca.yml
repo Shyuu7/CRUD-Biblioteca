@@ -33,6 +33,7 @@ permissions:
 
 env:
   MAVEN_OPTS: "-Xmx3072m"
+  JAVA_VERSION: '21'
 
 jobs:
   analise-estatica:
@@ -46,10 +47,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Configurar JDK 21
+      - name: Configurar JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
 
       - name: Cache das dependências Maven
@@ -74,41 +75,36 @@ jobs:
       - name: Análise de dependências com Snyk
         run: |
           if [ -n "${{ secrets.SNYK_TOKEN }}" ]; then
-            echo "Configurando autenticação do Snyk..."
             npm install -g snyk
-            echo "${{ secrets.SNYK_TOKEN }}" | snyk auth --api-token
-          
-            echo "Executando análise Snyk..."
+            snyk auth ${{ secrets.SNYK_TOKEN }}
             snyk test --maven --sarif-file-output=snyk.sarif --severity-threshold=medium || true
           else
-            echo "Token Snyk não configurado, pulando análise"
             echo '{"runs": [{"results": []}]}' > snyk.sarif
           fi
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      - name: Gerar relatório HTML do Snyk (alternativo)
+      - name: Gerar relatório HTML do Snyk
         if: always()
         run: |
           if [ -n "${{ secrets.SNYK_TOKEN }}" ]; then
-            echo "Gerando relatório HTML do Snyk..."
             npm install -g snyk-to-html
+            snyk auth ${{ secrets.SNYK_TOKEN }}
             snyk test --maven --json > snyk-results.json || true
             snyk-to-html -i snyk-results.json -o snyk-report.html || true
           else
-            echo "Token Snyk não configurado, criando relatório mock"
-            echo "<html><body><h1>Relatório Snyk</h1><p>Token não configurado para análise de vulnerabilidades</p></body></html>" > snyk-report.html
+            echo "<html><body><h1>Relatório Snyk</h1><p>Token não configurado</p></body></html>" > snyk-report.html
             echo '{"vulnerabilities": [], "summary": "Token não configurado"}' > snyk-results.json
           fi
 
-      - name: Upload relatório Snyk para GitHub (se SARIF existir)
+      - name: Upload relatório Snyk para GitHub
         uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('snyk.sarif') != ''
         with:
           sarif_file: snyk.sarif
 
-      - name: Upload relatórios HTML de análise estática
+      - name: Upload relatórios HTML
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -122,7 +118,7 @@ jobs:
   analise-dinamica:
     runs-on: ubuntu-latest
     needs: analise-estatica
-    if: github.event_name == 'release' || github.event.inputs.run_dast == 'true'
+    if: always() && needs.analise-estatica.result != 'cancelled'
     environment: ${{ github.event.inputs.environment || 'development' }}
 
     steps:
@@ -135,18 +131,16 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Pull e executar aplicação do DockerHub
+      - name: Pull e iniciar aplicação do DockerHub
         run: |
-          # Fazer pull da imagem
-          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/biblioteca-app:${{ github.ref_name }}-${{ github.sha }}
-
-          # Executar container
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          IMAGE_TAG="${{ github.ref_name }}-${SHORT_SHA}"
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/biblioteca-app:${IMAGE_TAG}
           docker run -d -p 7000:7000 \
             --name biblioteca-app \
-            ${{ secrets.DOCKERHUB_USERNAME }}/biblioteca-app:${{ github.ref_name }}-${{ github.sha }}
-
-          # Aguardar aplicação inicializar
-          timeout 60 bash -c 'until curl -f http://localhost:7000/livros; do sleep 2; done'
+            ${{ secrets.DOCKERHUB_USERNAME }}/biblioteca-app:${IMAGE_TAG}
+          sleep 45
+          curl -f http://localhost:7000/livros || exit 1
 
       - name: Análise DAST com OWASP ZAP
         uses: zaproxy/action-full-scan@v0.13.0
@@ -161,8 +155,8 @@ jobs:
 
   deploy-staging:
     runs-on: ubuntu-latest
-    needs: [analise-estatica, analise-dinamica]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [ analise-estatica, analise-dinamica ]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && needs.analise-dinamica.result == 'success'
     environment:
       name: staging
       url: ${{ steps.deploy.outputs.url }}
@@ -218,19 +212,3 @@ jobs:
         env:
           PROD_API_KEY: ${{ secrets.PROD_API_KEY }}
           PROD_URL: ${{ vars.PROD_URL }}
-
-  notificacao:
-    runs-on: ubuntu-latest
-    needs: [ analise-estatica, analise-dinamica ]
-    if: always()
-
-    steps:
-      - name: Resumo da execução
-        run: |
-          echo "=== Resumo da Pipeline de Segurança ==="
-          echo "SHA do commit: ${{ github.sha }}"
-          echo "Branch: ${{ github.ref_name }}"
-          echo "Evento: ${{ github.event_name }}"
-          echo "Status dos jobs:"
-          echo "- Análise Estática: ${{ needs.analise-estatica.result }}"
-          echo "- Análise Dinâmica: ${{ needs.analise-dinamica.result }}"
