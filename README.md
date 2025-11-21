@@ -135,8 +135,8 @@ src/
 │   │       ├── controller/   # Controladores REST
 │   │       ├── model/        # Modelos de dados
 |   |       ├── repository/
-|   |           ├── implementations   # Implementações dos repositórios
-|   |           └── interfaces        # Interfaces
+|   |       │   ├── implementations   # Implementações dos repositórios
+|   |       │   └── interfaces        # Interfaces
 │   │       ├── service/      # Lógica de negócio
 │   │       ├── security/     # Validação e sanitização
 │   │       ├── utils/        # Utilitários
