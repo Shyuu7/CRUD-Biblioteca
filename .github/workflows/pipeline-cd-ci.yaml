@@ -73,14 +73,13 @@ jobs:
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build e Push imagem Docker
-        id: build
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+      - name: Build e push da imagem Docker
+        run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          IMAGE_TAG="${{ github.ref_name }}-${SHORT_SHA}"
+
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/biblioteca-app:${IMAGE_TAG} .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/biblioteca-app:${IMAGE_TAG}
 
       - name: Upload JAR
         uses: actions/upload-artifact@v4
