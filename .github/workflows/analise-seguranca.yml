@@ -77,20 +77,42 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --sarif-file-output=snyk.sarif --severity-threshold=high
+          args: --sarif-file-output=snyk.sarif --severity-threshold=medium
 
-      - name: Upload relatório Snyk para GitHub
-        uses: github/codeql-action/upload-sarif@v3
+      - name: Verificar arquivos gerados pelo Snyk
+        run: |
+          echo "=== Arquivos no diretório atual ==="
+          ls -la
+          echo "=== Procurando arquivos SARIF ==="
+          find . -name "*.sarif" -type f || echo "Nenhum arquivo SARIF encontrado"
+
+      - name: Gerar relatório HTML do Snyk (alternativo)
         if: always()
+        run: |
+          # Executar Snyk novamente para gerar relatório HTML
+          if [ -n "${{ secrets.SNYK_TOKEN }}" ]; then
+            npx snyk test --json > snyk-results.json || true
+            npx snyk-to-html -i snyk-results.json -o snyk-report.html || true
+          else
+            echo "Token Snyk não configurado, criando relatório mock"
+            echo "<html><body><h1>Relatório Snyk</h1><p>Token não configurado</p></body></html>" > snyk-report.html
+          fi
+
+      - name: Upload relatório Snyk para GitHub (se SARIF existir)
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('snyk.sarif') != ''
         with:
           sarif_file: snyk.sarif
 
-      - name: Upload artefatos de análise estática
+      - name: Upload relatórios HTML de análise estática
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: relatorios-sast-${{ github.sha }}
-          path: snyk.sarif
+          name: relatorios-seguranca-html-${{ github.sha }}
+          path: |
+            snyk-report.html
+            snyk-results.json
+          if-no-files-found: warn
           retention-days: 30
 
   analise-dinamica:
