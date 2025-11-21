@@ -2,7 +2,7 @@ name: Pipeline CI/CD Principal
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, test, production ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -28,10 +28,10 @@ jobs:
       - name: Fazer checkout do código
         uses: actions/checkout@v4
 
-      - name: Configurar JDK 21
+      - name: Configurar JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
 
       - name: Cache das dependências Maven
