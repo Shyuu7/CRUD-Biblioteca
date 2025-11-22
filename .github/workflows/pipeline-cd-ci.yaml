@@ -2,9 +2,9 @@ name: Pipeline CI/CD Principal
 
 on:
   push:
-    branches: [ main, develop, test, production ]
+    branches: [ main, prod ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, prod ]
   workflow_dispatch:
 
 permissions:

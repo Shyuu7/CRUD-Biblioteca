@@ -1,6 +1,8 @@
 name: Pipeline Segurança e Análise
 
 on:
+  push:
+    branches: [ dev ]
   workflow_run:
     workflows: ["Pipeline CI/CD Principal"]
     types: [completed]

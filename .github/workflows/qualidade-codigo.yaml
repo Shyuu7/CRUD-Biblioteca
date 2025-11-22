@@ -1,10 +1,11 @@
 name: Análise de Qualidade do Código
 
 on:
+  push:
+    branches: [ dev ]
   workflow_run:
     workflows: ["Pipeline CI/CD Principal"]
     types: [completed]
-  workflow_dispatch:
 
 permissions:
   contents: read

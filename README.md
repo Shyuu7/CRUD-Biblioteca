@@ -17,6 +17,10 @@ O sistema foi desenvolvido para gerenciar o acervo de uma biblioteca que realiza
 - **Selenium** - Testes automatizados de interface
 - **JaCoCo** - Cobertura de código
 - **SpotBugs & Checkstyle** - Análise estática de código
+- **Docker** - Containerização da aplicação
+- **CodeQL** - Análise de segurança estática
+- **Snyk** - Análise de vulnerabilidades em dependências
+- **OWASP ZAP** - Análise dinâmica de segurança
 - **GitHub Actions** - CI/CD e automação
 
 ## 📋 Regras de Negócio
@@ -184,8 +188,8 @@ O projeto inclui workflows automatizados para:
 de uma imagem Docker e seu push para o DockerHub.
 
 **Triggers**:
-- Push nas branches `main`, `develop`, `test`, `production`
-- Pull requests para branch `main`
+- Push nas branches `main`, `prod`
+- Pull requests para branches `main`, `prod`
 - Execução manual via `workflow_dispatch`
 
 **Funcionalidades**:
@@ -205,6 +209,7 @@ de uma imagem Docker e seu push para o DockerHub.
 
 **Triggers**:
 - Execução completa do workflow `pipeline-cd-ci.yaml`
+- Push na branch `dev`
 
 **Funcionalidades**:
 - 🔍 **Checkstyle**: Verificação de padrões de codificação
@@ -234,9 +239,8 @@ de uma imagem Docker e seu push para o DockerHub.
 **Descrição**: Workflow abrangente de análise de segurança com múltiplas ferramentas SAST e DAST.
 
 **Triggers**:
-- Execução após conclusão do Pipeline CI/CD Principal
-- Publicação de releases
-- Execução manual com opções configuráveis
+- Execução completa do workflow `pipeline-cd-ci.yaml`
+- Push na branch `dev`
 
 **Funcionalidades**:
 - 🔒 **SAST com CodeQL**: Análise estática de segurança do código fonte
@@ -259,6 +263,7 @@ de uma imagem Docker e seu push para o DockerHub.
 ### 📈 Monitoramento e Relatórios
 
 **Artefatos Gerados**:
+- Arquivos .jar da aplicação das branches `main` e `prod`
 - Relatórios de testes unitários (JUnit XML)
 - Screenshots dos testes Selenium em `target/selenium-screenshots/`
 - Relatórios de cobertura JaCoCo
