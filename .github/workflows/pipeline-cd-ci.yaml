@@ -68,7 +68,15 @@ jobs:
       - name: Build e push da imagem Docker
         run: |
           SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          IMAGE_TAG="${{ github.ref_name }}-${SHORT_SHA}"
+
+          # Se contém "/", pegar apenas a parte após a barra, senão usar o nome completo
+          if [[ "${{ github.ref_name }}" == *"/"* ]]; then
+            BRANCH_SUFFIX=$(echo "${{ github.ref_name }}" | cut -d'/' -f2)
+          else
+            BRANCH_SUFFIX="${{ github.ref_name }}"
+          fi
+
+          IMAGE_TAG="${BRANCH_SUFFIX}-${SHORT_SHA}"
 
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/biblioteca-app:${IMAGE_TAG} .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/biblioteca-app:${IMAGE_TAG}
