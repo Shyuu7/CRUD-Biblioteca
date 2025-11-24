@@ -1,7 +1,6 @@
 package com.br.infnet.repository.interfaces;
 
 import com.br.infnet.model.Emprestimo;
-import com.br.infnet.model.Livro;
 
 import java.util.List;
 
